@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Form Box -->
+  <rect x="6" y="8" width="52" height="48" rx="4" fill="#F7FAFC" stroke="#4A5568" stroke-width="2"/>
+  
+  <!-- Form Field Lines -->
+  <rect x="14" y="16" width="36" height="6" rx="2" fill="#A0AEC0"/>
+  <rect x="14" y="26" width="36" height="6" rx="2" fill="#CBD5E0"/>
+  <rect x="14" y="36" width="24" height="6" rx="2" fill="#CBD5E0"/>
+
+  <!-- Cursor / Pencil Icon -->
+  <path d="M45 36L52 52L42 48L40 58L35 42L45 36Z" fill="#3182CE"/>
+  <path d="M44.5 35.5L34.5 41.5L39.5 58.5L41.5 47.5L51.5 51.5L44.5 35.5Z" stroke="#2B6CB0"/>
+</svg>
