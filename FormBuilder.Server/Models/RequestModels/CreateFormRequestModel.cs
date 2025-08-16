@@ -1,9 +1,14 @@
-﻿namespace FormBuilder.Server.Models.RequestModels;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FormBuilder.Server.Models.RequestModels;
 
 public class CreateFormRequestModel
 {
-    public string FormName { get; set; }
-    public bool IsTemplate { get; set; }
-    public string TemplateName { get; set; }
-    public string FormJson { get; set; }
+    [Required(ErrorMessage = "Form Name is required!!")]
+    public string Name { get; set; }
+
+    public string? Description { get; set; }
+
+    [Required(ErrorMessage = "Form Fields is required!!")]
+    public string Fields { get; set; }
 }

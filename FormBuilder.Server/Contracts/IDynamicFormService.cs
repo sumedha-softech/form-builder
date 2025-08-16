@@ -3,11 +3,11 @@ using FormBuilder.Server.Models.RequestModels;
 
 namespace FormBuilder.Server.Contracts;
 
-public interface IFormService
+public interface IDynamicFormService
 {
-    Task<ResponseModel> GetFormAsync(bool isRequestForTemplates= false);
-    Task<ResponseModel> GetFormJsonAsync(int formId);
+    Task<ResponseModel> GetFormAsync();
+    Task<ResponseModel> GetFormByIdAsync(int id);
     Task<ResponseModel> SaveFormAsync(CreateFormRequestModel model);
+    Task<ResponseModel> EditFormAsync(int id,UpdateFormRequestModel model);
     Task<ResponseModel> DeleteFormAsync(int formId);
-    Task<ResponseModel> IsFormExistsAsync(int formId);
 }

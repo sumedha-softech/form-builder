@@ -11,7 +11,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Forms />} />
-                    <Route path="/formbuilder" element={<FormBuilder />} />
+                    <Route path="/formbuilder/:id?/:isTemplate?" element={<FormBuilder />} />
                 </Routes>
             </BrowserRouter>
         </>

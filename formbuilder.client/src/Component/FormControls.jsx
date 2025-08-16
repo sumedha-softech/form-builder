@@ -3,8 +3,10 @@ const FormControls = ({ controls }) => {
 
     return (
         <>
-            <div className="col-2">
-                <h5>Toolbox</h5>
+            <div className="col-12 col-md-3 col-lg-2">
+                <div className="text-center mb-3 fw-bold fs-5">
+                    Toolbox
+                </div>
                 {Object.keys(controls).map((type) => (
                     <div
                         key={type}

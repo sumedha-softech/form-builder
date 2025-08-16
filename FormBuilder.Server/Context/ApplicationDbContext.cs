@@ -10,5 +10,6 @@ public class ApplicationDbContext : DbContext
     {
     }
 
-     public DbSet<Form> Forms { get; set; }
+     public DbSet<DynamicForm> DynamicForms { get; set; }
+     public DbSet<Template> Templates { get; set; }
 }

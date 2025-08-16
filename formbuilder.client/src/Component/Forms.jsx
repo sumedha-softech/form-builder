@@ -1,47 +1,58 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { fetchForms } from '../Api/formApi';
+import { Link } from 'react-router-dom';
+import { AppContext } from '../Utils/MyContext';
+import { DeleteForm } from '../Api/formApi';
+import FormsTemplates from './FormsTemplates';
 
 const Forms = () => {
-    const [templates, setTemplates] = useState([]);
-
+    const { forms, getForms } = React.useContext(AppContext);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         (async () => {
-            var res = await fetchForms(true);
-            if (res.isSuccess) {
-                var updated = res.data.map((value) => {
-                    return { id: value.formId, name: value.formName }
-                });
-                setTemplates(updated);
-            } else {
-                alert(res.message);
-            }
+            setIsLoading(true);
+            await getForms();
+            setIsLoading(false);
         })();
     }, [])
 
+    const handleDeleteForm = async (id) => {
+        var res = await DeleteForm(id);
+        if (!res.isSuccess) {
+            console.error("error while deleting form. ", res)
+            return;
+        }
+
+        await getForms();
+    }
+
     return (
         <div className="container-fluid p-4 border">
-            <h4>Form Builder Project</h4>
+            <h4 className="mb-5 border p-4 text-bold text-center" style={{ boxShadow: "10px 10px gray", backgroundColor:"darkgray"}}>Form Builder Project</h4>
 
             {/* Templates */}
-            <div className="d-flex flex-wrap gap-3 my-3 border-bottom pb-3">
-                {templates && templates.map((temp, i) => (
-                    <div key={i} className="template-box border p-3" style={{ width: '120px', height: '100px' }}>
-                        <a href="/formbuilder">{temp.name}</a>
-                    </div>
-                ))
-                }
-            </div>
+            <FormsTemplates />
 
             {/* Forms List */}
-            <h5 className="my-3">List of Forms</h5>
-            <div className="d-flex flex-column gap-2" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                {[...Array(20)].map((_, i) => (
-                    <div key={i} className="form-box border p-3">
-                        Form {i + 1}
-                    </div>
-                ))}
+            <div style={{ textAlign: "center" }}>
+                <h5 className="my-3">📋 Available Forms</h5>
+                <div className="d-flex flex-column gap-2 " style={{ maxHeight: '500px', overflowY: 'auto', maxWidth: "900px", margin: "auto" }}>
+
+                    {
+                        isLoading
+                            ? <p style={{ textAlign: "center", fontSize: "20px" }}>Loading...</p>
+                            : forms && forms.length > 0
+                                ? forms.map((form, i) => (
+                                    <div key={i} className="position-relative form-box border p-3 rounded">
+                                        <button type="button" className="btn position-absolute top-0 end-0 delete-form-btn d-none mt-2" onClick={() => handleDeleteForm(form.id)}> <i className="bi bi-trash"></i></button>
+                                        <Link to={`/formbuilder/${form.id}/${false}`}> {form.name}</Link>
+                                    </div>
+                                ))
+                                : <p style={{ textAlign: "center", fontSize: "20px" }}>Records not found!!</p>
+                    }
+
+                </div>
             </div>
         </div>
     );

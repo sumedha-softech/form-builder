@@ -47,7 +47,11 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/api/Form': {
+            '^/api/dynamicForm': {
+                target,
+                secure: false
+            },
+            '^/api/template': {
                 target,
                 secure: false
             }

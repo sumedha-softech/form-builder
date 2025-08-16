@@ -3,7 +3,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 
 const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => {
     const [controlData, setControlData] = useState(null);
-    const [editingOptionId, setEditingOptionId] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
 
     useEffect(() => {
         if (controlId && formData) {
@@ -22,10 +22,12 @@ const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => 
                     label: controlData.label?.trim() !== "" ? controlData.label : c.label,
                     placeholder: controlData.placeholder?.trim() !== "" ? controlData.placeholder : c.placeholder,
                     name: controlData.name?.trim() !== "" ? controlData.name : c.name,
+                    id: controlData.name?.trim() !== "" ? controlData.name : c.id,
                     isRequired: controlData.isRequired ?? c.isRequired,
                 };
                 if (c.type === "file") {
-                    data = { ...data, accept: controlData.accept?.trim() !== "" ? controlData.accept : c.accept
+                    data = {
+                        ...data, accept: controlData.accept?.trim() !== "" ? controlData.accept : c.accept
                     };
                 }
                 else if (["radio", "checkbox", "dropdown"].includes(c.type)) {
@@ -47,34 +49,101 @@ const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => 
             return c;
         });
         setFormData({ ...formData, controls: updated });
-        setEditingCtrlId(null); 
+        setEditingCtrlId(null);
     };
 
-    const handleOptionChange = (i, value) => {
-        const newOptions = [...controlData.options];
-        newOptions[i] = value?.trim() ? value : `option ${i}`;
+    const handleOptionChange = (parentIndex, childIndex, value, isLabel, isChildren) => {
+        let newOptions = [];
+
+        if (isChildren === true) {
+            newOptions = [...controlData.options]
+
+            if (isLabel === true) {
+                newOptions[parentIndex].childrens[childIndex].label = value?.trim() ? value : `option ${parentIndex + 1}${childIndex + 1}`;
+            } else {
+                newOptions[parentIndex].childrens[childIndex].value = value?.trim() ? value : `option${parentIndex + 1}${childIndex + 1}`;
+            }
+        } else {
+            newOptions = [...controlData.options];
+
+            if (isLabel === true) {
+                newOptions[parentIndex].label = value?.trim() ? value : `option ${parentIndex + 1}`;
+            } else {
+                newOptions[parentIndex].value = value?.trim() ? value : `option${parentIndex + 1}`;
+            }
+        }
+
         setControlData(per => ({ ...per, options: newOptions }));
     };
 
-    const addOption = (labelPrefix = "Option") => {
-        setControlData(per => ({
-            ...per,
-            options: [...(per.options || []), `${labelPrefix} ${per.options?.length + 1}`]
-        }));
-    };
+    const addOption = (labelPrefix = "Option", parentIndex, isChildren) => {
+        if (isChildren) {
+            const options = [...controlData.options];
+            const IndexOption = options[parentIndex];
+            const newChild = { label: `Child ${parentIndex + 1}${(IndexOption.childrens?.length || 0) + 1}`, value: `Child${parentIndex + 1}${(IndexOption.childrens?.length || 0) + 1}` }
 
-    const handleRemove = (i) => {
-        if (!Array.isArray(controlData.options)) return;
-        setControlData(prev => ({ ...prev, options: controlData.options.filter((_, index) => index !== i) }));
-    };
+            var updatedOptions = options?.map((_, index) => {
+                if (index === parentIndex) return { ...IndexOption, childrens: [...(IndexOption.childrens || []), newChild] };
+                return _;
+            })
 
-    const handleSaveName = (e) => {
-        var isNameAlreadyUsed = formData.controls.some(ctrl => ctrl.name === e.target.value.trim() && ctrl.id !== controlId);
-        if (isNameAlreadyUsed) {
-            alert("Name already used by another control. Please choose a different name.");
-            return;
+            setControlData(per => ({
+                ...per,
+                options: updatedOptions
+            }));
+        } else {
+            setControlData(per => ({
+                ...per,
+                options: [...(per.options || []), { label: `${labelPrefix} ${per.options?.length + 1}`, value: `${labelPrefix}${per.options?.length + 1}` }]
+            }));
         }
-        setControlData(per => ({ ...per, name: e.target.value }));
+    };
+
+    const handleRemove = (parentIndex, childIndex, isChildren) => {
+        if (!Array.isArray(controlData.options) && !isChildren) return;
+        if (!Array.isArray(controlData.options[parentIndex]?.childrens) && isChildren) return;
+
+        if (isChildren) {
+            setControlData(prev => ({ ...prev, options: controlData.options.filter((_, index) => index !== parentIndex) }));
+        } else {
+            setControlData(prev => {
+                return {
+                    ...prev,
+                    options: controlData.options.filter((option, index) => {
+                        if (index === parentIndex) {
+                            return { ...option, childrens: option.childrens.filter((_, childI) => childI != childIndex) }
+                        } else {
+                            index !== parentIndex
+                        }
+                    })
+                }
+            });
+        }
+    };
+
+    const renderOptions = (opt, parentIndex, childIndex, isChildren) => {
+
+        return (
+            <>
+                <Form.Group className="mb-3">
+                    <Form.Label>label</Form.Label>
+                    <Form.Control
+                        type="text"
+                        value={opt.label || ""}
+                        onChange={(e) => handleOptionChange(parentIndex, childIndex, e.target.value, true, isChildren)}
+                    />
+
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>value</Form.Label>
+                    <Form.Control
+                        type="text"
+                        value={opt.value || ""}
+                        onChange={(e) => handleOptionChange(parentIndex, childIndex, e.target.value, false, isChildren)}
+                    />
+
+                </Form.Group>  </>
+        )
     }
 
     return (
@@ -94,7 +163,7 @@ const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => 
                             onChange={(e) => setControlData({ ...controlData, label: e.target.value })}
                         />
                     </Form.Group>
-                    {["text", "number", "email", "file", "textarea"].includes(controlData?.type) &&
+                    {["text", "number", "email", "file", "textarea", "password"].includes(controlData?.type) &&
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>PlaceHolder</Form.Label>
                             <Form.Control
@@ -111,9 +180,24 @@ const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => 
                             type="text"
                             placeholder="enter text for name attribute"
                             value={controlData?.name || ""}
-                            onChange={(e) => handleSaveName(e)}
+                            onChange={(e) => {
+                                setControlData(per => ({ ...per, name: e.target.value, id: e.target.value }))
+                                const isExist = formData?.controls.find(c => c.name === e.target.value && c.id !== controlId);
+                                if (isExist) {
+                                    setErrorMessage({ Name: ["Name should be unique!!"] });
+                                }
+                                else if (!e.target.value) {
+                                    setErrorMessage({ Name: ["Name is required!!"] });
+                                } else {
+                                    setErrorMessage();
+                                }
+                                return;
+                            }
+                            }
                         />
-
+                        {
+                            errorMessage?.Name && <Form.Text className="text-danger"> {errorMessage.Name[0]} </Form.Text>
+                        }
                     </Form.Group>
 
                     {controlData?.type === "textarea" &&
@@ -131,7 +215,7 @@ const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => 
                             <Form.Group className="mb-3">
                                 <Form.Label>Cols</Form.Label>
                                 <Form.Control
-                                type="number"
+                                    type="number"
                                     placeholder="enter cols value"
                                     value={controlData?.cols || ""}
                                     onChange={(e) => setControlData({ ...controlData, cols: e.target.value })}
@@ -164,31 +248,30 @@ const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => 
 
                     {controlData && controlData.options &&
                         <>
-                            {controlData?.options?.map((opt, i) => (
-                                editingOptionId?.ctrlId === controlId && editingOptionId?.index === i ? (
-                                    <Form.Control
-                                        className="mb-3"
-                                        key={i}
-                                        type="text"
-                                        style={{ width: "200px" }}
-                                        value={opt}
-                                        onChange={(e) => handleOptionChange(i, e.target.value)}
-                                        onBlur={() => setEditingOptionId(null)}
-                                        autoFocus
-                                    />
-                                ) : (
+                            <fieldset style={{ height: "300px", overflowY: "auto" }}>
+                                <legend>Options</legend>
+                                {controlData?.options?.map((opt, parentIndex) => (
                                     <>
-                                        <Form.Label key={i}
-                                            onClick={() => setEditingOptionId({ ctrlId: controlId, index: i })}
-                                            style={{ cursor: "pointer" }}>
-                                            {opt}
-                                        </Form.Label>
-                                        <button type="button" className="btn mb-3" onClick={() => handleRemove(i)}> <i className="bi bi-trash"></i> </button> <br />
+                                        <div className="d-flex gap-3">
+                                            {renderOptions(opt, parentIndex, null, false)}
+
+                                            <button type="button" className="btn mt-3" onClick={() => handleRemove(parentIndex, null, false)}> <i className="bi bi-trash"></i> </button> <br />
+                                            <button type="button" className="btn btn-secondary mt-4" style={{ height: "40px" }} onClick={() => addOption(controlData.type === "checkbox" ? "Checkbox" : "Option", parentIndex, true)}> Addchild</button> <br />
+                                        </div>
+
+                                        {opt.childrens && opt?.childrens?.map((opt, childIndex) => (
+                                            <>
+                                                <div className="d-flex gap-3 ms-4">
+                                                    {renderOptions(opt, parentIndex, childIndex, true)}
+                                                    <button type="button" className="btn mt-3" onClick={() => handleRemove(parentIndex, childIndex, true)}> <i className="bi bi-trash"></i> </button> <br />
+                                                </div>
+                                            </>
+                                        ))}
                                     </>
-                                )
-                            ))}
+                                ))}
+                            </fieldset>
                             {/* Add new option button */}
-                            <Button variant="secondary" onClick={() => addOption(controlData.type === "checkbox" ? "Checkbox" : "Option")}>
+                            <Button variant="secondary" onClick={() => addOption(controlData.type === "checkbox" ? "Checkbox" : "Option", null, null)}>
                                 + Add Option
                             </Button>
                         </>
@@ -198,7 +281,7 @@ const EditControl = ({ controlId, setEditingCtrlId, formData, setFormData }) => 
 
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => setEditingCtrlId(null)}> Close </Button>
-                <Button variant="primary" onClick={handleSave} disabled={controlData?.name && false}> Save Changes </Button>
+                <Button variant="primary" onClick={handleSave} disabled={controlData?.name && false} disabled={errorMessage}> Save Changes </Button>
             </Modal.Footer>
         </Modal>
     )
