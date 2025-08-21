@@ -2,11 +2,11 @@
 
 public class ResponseModel
 {
-    public string Message { get; set; }
+    public string? Message { get; set; }
     public bool IsSuccess { get; set; }
-    public object Data { get; set; }
+    public object? Data { get; set; }
 
-    public static ResponseModel Success(string message = "Operation completed successfully",object data = null )
+    public static ResponseModel Success(string message = "Operation completed successfully",object? data = null )
     {
         return new ResponseModel
         {
@@ -16,7 +16,7 @@ public class ResponseModel
         };
     }
 
-    public static ResponseModel Fail(string message = "An error occurred", object data = null)
+    public static ResponseModel Fail(string message = "An error occurred", object? data = null)
     {
         return new ResponseModel
         {

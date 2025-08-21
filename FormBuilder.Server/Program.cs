@@ -1,16 +1,19 @@
-using FormBuilder.Server.Context;
-using FormBuilder.Server.Contracts;
-using FormBuilder.Server.Middleware;
-using FormBuilder.Server.Services;
+using FormBuilder.Server.Application.Contracts;
+using FormBuilder.Server.Application.Middleware;
+using FormBuilder.Server.Application.Services;
+using FormBuilder.Server.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException("connection string not found!!")));
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException("DefaultConnection", message: "connection string not found!!");
+builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<IDynamicFormService, DynamicFormService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -21,11 +24,9 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
