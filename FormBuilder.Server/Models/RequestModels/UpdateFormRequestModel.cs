@@ -1,6 +1,5 @@
-﻿namespace FormBuilder.Server.Models.RequestModels
+﻿namespace FormBuilder.Server.Models.RequestModels;
+
+public class UpdateFormRequestModel : CreateFormRequestModel
 {
-    public class UpdateFormRequestModel : CreateFormRequestModel
-    {
-    }
 }

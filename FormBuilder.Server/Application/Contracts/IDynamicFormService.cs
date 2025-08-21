@@ -1,7 +1,7 @@
 ﻿using FormBuilder.Server.Models;
 using FormBuilder.Server.Models.RequestModels;
 
-namespace FormBuilder.Server.Contracts;
+namespace FormBuilder.Server.Application.Contracts;
 
 public interface IDynamicFormService
 {

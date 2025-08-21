@@ -1,11 +1,11 @@
-﻿using FormBuilder.Server.Context;
-using FormBuilder.Server.Contracts;
+﻿using FormBuilder.Server.Application.Contracts;
+using FormBuilder.Server.Infrastructure.Persistence;
+using FormBuilder.Server.Infrastructure.Persistence.Entity;
 using FormBuilder.Server.Models;
-using FormBuilder.Server.Models.Entity;
 using FormBuilder.Server.Models.RequestModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace FormBuilder.Server.Services;
+namespace FormBuilder.Server.Application.Services;
 
 public class DynamicFormService(ApplicationDbContext context) : IDynamicFormService
 {
@@ -27,6 +27,7 @@ public class DynamicFormService(ApplicationDbContext context) : IDynamicFormServ
             return ResponseModel.Fail("Form not found!!");
 
         form.IsDeleted = true;
+        form.DeletedAt = DateTime.UtcNow;
         form.UpdatedAt = DateTime.UtcNow;
 
         context.DynamicForms.Update(form);
