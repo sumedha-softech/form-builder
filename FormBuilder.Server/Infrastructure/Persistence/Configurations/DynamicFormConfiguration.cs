@@ -17,7 +17,7 @@ public class DynamicFormConfiguration : IEntityTypeConfiguration<DynamicForm>
 
         builder.Property(e => e.Name).HasMaxLength(256).IsRequired();
         builder.Property(e => e.Description).HasMaxLength(512).IsRequired(false);
-        builder.Property(e => e.Fields).IsRequired();
+        builder.Property(e => e.Configuration).IsRequired();
 
         builder.Property(e => e.CreatedAt).IsRequired();
         builder.Property(e => e.UpdatedAt).IsRequired(false);

@@ -10,7 +10,7 @@ namespace FormBuilder.Server.Controllers;
 public class DynamicFormController(IDynamicFormService formService) : ControllerBase
 {
     #region [Get All Forms]
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> GetForms()
     {
         var response = await formService.GetFormAsync();
@@ -34,7 +34,7 @@ public class DynamicFormController(IDynamicFormService formService) : Controller
     #endregion [Get Form By Id]
 
     #region [Save Form]
-    [HttpPost("")]
+    [HttpPost]
     public async Task<IActionResult> SaveForm([FromBody] CreateFormRequestModel model)
     {
         if (model == null)

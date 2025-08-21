@@ -1,85 +1,13 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import { useContext, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import FormCanvas from "./FormCanvas";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import FormBuilderTempletes from "./FormBuilderTempletes";
-import FormControls from "./FormControls";
 import { fetchFormById } from "../Api/formApi";
-import { useParams } from 'react-router-dom';
 import { fetchTemplateById } from "../Api/templateApi";
-
-const controlTemplates = {
-    text: {
-        type: "text",
-        label: "TextBox",
-        isRequired: true,
-        placeholder: "Enter text",
-    },
-    file: {
-        type: "file",
-        label: "File",
-        isRequired: true,
-        accept: "*/*",
-        placeholder: "Choose file",
-    },
-    email: {
-        type: "email",
-        label: "Email",
-        isRequired: true,
-        placeholder: "Enter email",
-    },
-    number: {
-        type: "number",
-        label: "Number",
-        isRequired: true,
-        placeholder: "Enter number",
-    },
-    password: {
-        type: "password",
-        label: "Password",
-        isRequired: false,
-        placeholder: "Enter Password",
-    },
-    date: {
-        type: "date",
-        label: "Date",
-        isRequired: true,
-        placeholder: "Choose date",
-    },
-    datetime: {
-        type: "datetime-local",
-        label: "Date Time",
-        isRequired: true,
-        placeholder: "Choose date time",
-    },
-    textarea: {
-        type: "textarea",
-        label: "Text Area",
-        isRequired: true,
-        placeholder: "Enter text",
-        cols: 10,
-        rows: 10
-    },
-    radio: {
-        type: "radio",
-        label: "Radio Options",
-        isRequired: true,
-        options: [{ label: "option 1", value: "Option1" }, { label: "option 2", value: "Option2" }],
-    },
-    checkbox: {
-        type: "checkbox",
-        label: "Checkbox Options",
-        isRequired: true,
-        options: [{ label: "checkbox 1", value: "checkbox1" }, { label: "checkbox 2", value: "checkbox2" }],
-    },
-    dropdown: {
-        type: "dropdown",
-        label: "Dropdown",
-        isRequired: true,
-        options: [{ label: "option 1", value: "Option1" }, { label: "option 2", value: "Option2" }],
-    },
-};
+import { controlTemplates } from "../Utils/FormElements.js";
+import { AppContext } from "../Utils/MyContext.jsx";
 
 const FormBuilder = () => {
+    const { getTemplates, templates } = useContext(AppContext);
     const [formData, setFormData] = useState({});
     const [formDataText, setFormDataText] = useState({});
 
@@ -90,11 +18,17 @@ const FormBuilder = () => {
 
     useEffect(() => {
         (async () => {
+            await getTemplates();
+        })();
+    }, []);
+
+    useEffect(() => {
+        (async () => {
             setFormData({
                 name: "Untitled",
                 description: "",
-                controls: []
-            })
+                controls: [],
+            });
 
             if (id) {
                 var res = {};
@@ -116,11 +50,11 @@ const FormBuilder = () => {
                 setFormData({
                     name: "Untitled",
                     description: "",
-                    controls: []
-                })
+                    controls: [],
+                });
             }
         })();
-    }, [id])
+    }, [id]);
 
     const handleDrop = (e) => {
         e.preventDefault();
@@ -142,90 +76,145 @@ const FormBuilder = () => {
         if (formData?.controls && formData?.controls?.length > 0) {
             setFormDataText({
                 ...formData,
-                fields: formData?.controls
+                fields: formData?.controls,
             });
         }
-    }, [formData, setFormData])
+    }, [formData, setFormData]);
+
     return (
-        <>
-
-            <div className="container-fluid p-4 border h-100">
-                <div className="row">
-
-                    {/* Left Sidebar */}
-                    <FormBuilderTempletes />
-
-                    {/* Canvas */}
-                    <div className="col-12 col-md-6 col-lg-8 border-end position-relative mb-3">
+        <div className="container-lg p-1">
+            <div className="row">
+                {/* Left Sidebar */}
+                <div className="col-12 col-md-3 col-lg-2">
+                    <div className="d-flex justify-content-start align-items-center mb-3 py-2">
+                        <Link to={`/`} className="btn btn-outline-primary px-2 py-0 me-1">
+                            <i className="bi bi-arrow-left"></i>
+                        </Link>
+                        <h5 className="fw-bold fs-4">Form Builder</h5>
+                    </div>
+                    <div className="d-flex flex-column gap-2">
                         <div
-                            className="bg-white border rounded p-3"
-                            style={{ minHeight: "300px", maxHeight: "600px", overflowY: 'auto', marginBottom: "44px !important" }}
-                            onDrop={handleDrop}
+                            key={0}
+                            className="text-center text-black fw-bold fs-5 p-2 mb-2"
                         >
-                            {/* Form Name */}
-                            <input
-                                type="text"
-                                className="form-control mb-3 text-center fw-bold"
-                                value={formData.name || "Enter form name"}
-                                onChange={(e) => setFormData((prev) => (
-                                    {
-                                        ...prev,
-                                        name: e.target.value
-                                    }))}
-                                placeholder="Enter form name"
-                            />
-
-                            <textarea
-                                className="form-control mb-3 fw-bold"
-                                value={formData.description}
-                                onChange={(e) => setFormData((prev) => (
-                                    {
-                                        ...prev,
-                                        description: e.target.value
-                                    }))}
-                                placeholder="Enter form description"
-                            ></textarea>
-
-                            {/* Canvas UI */}
-                            {formData && <FormCanvas formId={id} formData={formData} setFormData={setFormData} isTemplate={isTemplate} />}
+                            Templates
                         </div>
-
+                        {templates &&
+                            templates.map((value) => (
+                                <div
+                                    key={value.id}
+                                    className="border p-2 text-center rounded"
+                                >
+                                    <Link to={`/builder/form/${value.id}/isTemplate=${true}`}>
+                                        {value.name}
+                                    </Link>
+                                </div>
+                            ))}
                     </div>
 
-                    {/* Toolbox */}
-                    <FormControls controls={controlTemplates} />
+                    <div className="border position-relative">
+                        <button
+                            className="btn position-absolute end-0 top-0"
+                            style={{ zIndex: 1, margin: "5px" }}
+                            onClick={() => {
+                                navigator.clipboard.writeText(
+                                    JSON.stringify(formDataText, null, 2)
+                                );
+                            }}
+                        >
+                            <i className="bi bi-copy"></i>
+                        </button>
+                        {/* Scrollable content */}
+                        <div style={{ height: "100%", overflowY: "auto", padding: "10px" }}>
+                            <pre>
+                                {JSON.stringify(
+                                    (() => {
+                                        // eslint-disable-next-line no-unused-vars
+                                        const {
+                                            id,
+                                            createdAt,
+                                            updatedAt,
+                                            isDeleted,
+                                            controls,
+                                            ...rest
+                                        } = formDataText;
+                                        return rest;
+                                    })(),
+                                    null,
+                                    2
+                                )}
+                            </pre>
+                        </div>
+                    </div>
                 </div>
 
-                <div
-                    className="border position-relative"
-                    style={{ height: "250px", width: "100%", paddingTop: "40px" }} // padding top for space under the button
-                >
-                    <button
-                        className="btn position-absolute end-0 top-0"
-                        style={{ zIndex: 1, margin: '5px' }}
-                        onClick={() => {
-                            navigator.clipboard.writeText(JSON.stringify(formDataText, null, 2))
+                {/* Canvas */}
+                <div className="col-12 col-md-6 col-lg-8">
+                    <div
+                        className="bg-white border rounded p-3 mb-5"
+                        style={{
+                            minHeight: "95dvh",
+                            overflowY: "auto",
                         }}
+                        onDrop={handleDrop}
                     >
-                        <i className="bi bi-copy"></i>
-                    </button>
-                    {/* Scrollable content */}
-                    <div style={{ height: "100%", overflowY: "auto", padding: "10px" }}>
-                        <pre>{
-                            JSON.stringify(
-                                (() => {
-                                    // eslint-disable-next-line no-unused-vars
-                                    const {id, createdAt, updatedAt, isDeleted,controls, ...rest } = formDataText;
-                                    return rest;
-                                })(),
-                                null,
-                                2
-                            )
-                        }</pre>
+                        {/* Form Name */}
+                        <input
+                            type="text"
+                            className="form-control mb-3 text-center fw-bold"
+                            value={formData.name || "Enter form name"}
+                            onChange={(e) =>
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    name: e.target.value,
+                                }))
+                            }
+                            placeholder="Enter form name"
+                        />
+
+                        <textarea
+                            className="form-control mb-3 fw-bold"
+                            value={formData.description}
+                            onChange={(e) =>
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    description: e.target.value,
+                                }))
+                            }
+                            placeholder="Enter form description"
+                        ></textarea>
+
+                        {/* Canvas UI */}
+                        {formData && (
+                            <FormCanvas
+                                formId={id}
+                                formData={formData}
+                                setFormData={setFormData}
+                                isTemplate={isTemplate}
+                            />
+                        )}
                     </div>
+                </div>
+
+                {/* Toolbox */}
+                <div className="col-12 col-md-3 col-lg-2">
+                    <h5 className="text-center mb-3 fw-bold">
+                        Toolbox
+                    </h5>
+                    {Object.keys(controlTemplates).map((type) => (
+                        <div
+                            key={type}
+                            className="border p-2 mb-2 text-center bg-light rounded"
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("controlType", type)}
+                            style={{ cursor: "grab" }}
+                        >
+                            {controlTemplates[type].label}
+                        </div>
+                    ))}
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

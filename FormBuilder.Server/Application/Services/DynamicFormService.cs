@@ -9,8 +9,6 @@ namespace FormBuilder.Server.Application.Services;
 
 public class DynamicFormService(ApplicationDbContext context) : IDynamicFormService
 {
- 
-
     public async Task<ResponseModel> GetFormByIdAsync(int id)
     {
         var form = await context.DynamicForms.FirstOrDefaultAsync(f => f.Id == id && !f.IsDeleted);
@@ -52,8 +50,10 @@ public class DynamicFormService(ApplicationDbContext context) : IDynamicFormServ
         var form = new DynamicForm
         {
             Name = model.Name ?? "Untitled Form",
-            Description= model.Description,
-            Fields = model.Fields,
+            Description = model.Description,
+
+            Configuration = model.Fields,
+
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false
         };
@@ -72,9 +72,13 @@ public class DynamicFormService(ApplicationDbContext context) : IDynamicFormServ
         if (form == null)
             return ResponseModel.Fail("Form not found!");
 
-        form.Name = model.Name ?? form.Name;
-        form.Fields = model.Fields;
-        form.Description = model.Description ?? form.Description;
+        form.Configuration = model.Fields;
+
+        if (!string.IsNullOrWhiteSpace(model.Name))
+            form.Name = model.Name;
+        if (!string.IsNullOrWhiteSpace(model.Description))
+            form.Description = model.Description;
+
         form.UpdatedAt = DateTime.UtcNow;
         context.DynamicForms.Update(form);
         await context.SaveChangesAsync();
