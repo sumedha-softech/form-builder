@@ -9,13 +9,13 @@ namespace FormBuilder.Server.Controllers;
 public class TemplateController(ITemplateService templateService) : ControllerBase
 {
     #region [Get All Templates]
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> GetTemplates()
     {
         var response = await templateService.GetTemplatesAsync();
 
         if (!response.IsSuccess)
-            return NotFound(response);
+            return StatusCode(204, response);
 
         return Ok(response);
     }
