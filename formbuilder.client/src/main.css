@@ -1,0 +1,48 @@
+@import url("bootstrap/dist/css/bootstrap.min.css");
+@import url("bootstrap-icons/font/bootstrap-icons.css");
+
+/* Custom styles for form builder */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+    background-color: #f8f9fa;
+}
+
+.form-builder-container {
+    height: 100vh;
+    background-color: #f1f3f4;
+}
+
+.sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #dee2e6;
+    width: 280px;
+    min-width: 280px;
+}
+
+.form-preview {
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+.properties-panel {
+    background-color: #ffffff;
+    border-left: 1px solid #dee2e6;
+    width: 320px;
+    min-width: 320px;
+}
+
+.border-transparent {
+    border-color: transparent !important;
+}
+
+.btn-success-custom {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.btn-success-custom:hover {
+    background-color: #157347;
+    border-color: #146c43;
+    color: white;
+}
