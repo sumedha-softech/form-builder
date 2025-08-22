@@ -41,7 +41,7 @@ const FormBuilder = () => {
 
                 if (res.isSuccess) {
                     var updated = res.data;
-                    const controls = JSON.parse(updated.fields);
+                    const controls = JSON.parse(updated.configuration);
                     setFormData({ ...res.data, controls: controls });
                 } else {
                     alert(res.message);
@@ -92,52 +92,41 @@ const FormBuilder = () => {
                         </Link>
                         <h5 className="fw-bold fs-4">Form Builder</h5>
                     </div>
-                    <div className="d-flex flex-column gap-2">
-                        <div
-                            key={0}
-                            className="text-center text-black fw-bold fs-5 p-2 mb-2"
-                        >
-                            Templates
-                        </div>
+                    <div className="d-flex flex-column gap-1 mb-3">
+                        <div className="text-center text-black fw-bold fs-5 p-2 mb-2">Templates</div>
                         {templates &&
                             templates.map((value) => (
-                                <div
+                                <Link
                                     key={value.id}
-                                    className="border p-2 text-center rounded"
+                                    className="btn btn-lg btn-outline-secondary"
+                                    to={`/builder/form/${value.id}/isTemplate=${true}`}
                                 >
-                                    <Link to={`/builder/form/${value.id}/isTemplate=${true}`}>
-                                        {value.name}
-                                    </Link>
-                                </div>
+                                    {value.name}
+                                </Link>
                             ))}
                     </div>
-
                     <div className="border position-relative">
                         <button
-                            className="btn position-absolute end-0 top-0"
-                            style={{ zIndex: 1, margin: "5px" }}
+                            className="btn position-absolute end-0 top-0 m-2 z-1"
                             onClick={() => {
-                                navigator.clipboard.writeText(
-                                    JSON.stringify(formDataText, null, 2)
-                                );
+                                navigator.clipboard.writeText(JSON.stringify(formDataText, null, 2));
                             }}
                         >
                             <i className="bi bi-copy"></i>
                         </button>
                         {/* Scrollable content */}
-                        <div style={{ height: "100%", overflowY: "auto", padding: "10px" }}>
+                        <div
+                            style={{
+                                height: "100%",
+                                overflowY: "auto",
+                                padding: "10px",
+                            }}
+                        >
                             <pre>
                                 {JSON.stringify(
                                     (() => {
                                         // eslint-disable-next-line no-unused-vars
-                                        const {
-                                            id,
-                                            createdAt,
-                                            updatedAt,
-                                            isDeleted,
-                                            controls,
-                                            ...rest
-                                        } = formDataText;
+                                        const { id, createdAt, updatedAt, isDeleted, controls, ...rest } = formDataText;
                                         return rest;
                                     })(),
                                     null,
@@ -198,9 +187,7 @@ const FormBuilder = () => {
 
                 {/* Toolbox */}
                 <div className="col-12 col-md-3 col-lg-2">
-                    <h5 className="text-center mb-3 fw-bold">
-                        Toolbox
-                    </h5>
+                    <h5 className="text-center mb-3 fw-bold">Toolbox</h5>
                     {Object.keys(controlTemplates).map((type) => (
                         <div
                             key={type}
