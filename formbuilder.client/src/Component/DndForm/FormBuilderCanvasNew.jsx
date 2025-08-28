@@ -26,16 +26,24 @@ function SortableSection({ section, children }) {
 }
 
 function SortableField({ field, children }) {
-  const { setNodeRef, transform, transition } = useSortable({ id: field.id });
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({ id: field.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    zIndex: isDragging ? 9999 : "auto",
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-      {children}
+    <div ref={setNodeRef} style={style} className={field.width + " mb-3"}>
+      <div className="card p-2 h-100">
+        <div className="d-flex align-items-center">
+          <div className="flex-grow-1">{children}</div>
+          <button type="button" className="btn btn-sm btn-light cursor-grab ms-2" {...attributes} {...listeners}>
+            <GripVertical size={16} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -52,7 +60,6 @@ const FormBuilderCanvasNew = ({
 }) => {
   const renderField = (field, sectionField) => {
     const isSelected = selectedField?.id === field.id;
-    console.log("Rendering field", field.id, "in section", sectionField.id);
 
     const fieldWrapper = (content) => (
       <div
@@ -70,7 +77,6 @@ const FormBuilderCanvasNew = ({
               onClick={(e) => {
                 e.stopPropagation();
                 onDeleteField(field.id, sectionField.id);
-                console.log("Deleted field", field.id, "from section", sectionField.id);
               }}
               className="btn btn-danger btn-sm position-absolute top-0 end-0 m-0 py-1 pb-2 px-2 lh-1"
             >
@@ -160,50 +166,54 @@ const FormBuilderCanvasNew = ({
                 .filter((field) => field.type === "section")
                 .map((section) => (
                   <SortableSection key={section.id} section={section}>
-                    <div
-                      id={section.id}
-                      className={`cursor-pointer card h-100 ${selectedSection?.id === section.id ? " border-primary" : ""}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const isInsideField = section.fields.some((f) => fieldRefs.current[f.id] && fieldRefs.current[f.id].contains(e.target));
-                        if (!isInsideField) {
-                          onSelectSection(section);
-                        }
-                      }}
-                      onDrop={(e) => onDropHandler(e, section.id)}
-                      onDragOver={(e) => e.preventDefault()}
-                    >
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between align-items-start mb-4">
-                          <div className={section.alignment}>
-                            {section.isShowTitle && <h5 className="card-title mb-1">{section.title}</h5>}
-                            {section.isShowDescription && <p className="text-muted small mb-0">{section.description}</p>}
+                    <div key={section.id} className={`${section.width} mb-4 p-0`}>
+                      <div
+                        id={section.id}
+                        className={`cursor-pointer card h-100 ${selectedSection?.id === section.id ? " border-primary" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const isInsideField = section.fields.some((f) => fieldRefs.current[f.id] && fieldRefs.current[f.id].contains(e.target));
+                          if (!isInsideField) {
+                            onSelectSection(section);
+                          }
+                        }}
+                        onDrop={(e) => onDropHandler(e, section.id)}
+                        onDragOver={(e) => e.preventDefault()}
+                      >
+                        <div className="card-body">
+                          <div className="d-flex justify-content-between align-items-start mb-4">
+                            <div className={section.alignment}>
+                              {section.isShowTitle && <h5 className="card-title mb-1">{section.title}</h5>}
+                              {section.isShowDescription && <p className="text-muted small mb-0">{section.description}</p>}
+                            </div>
+                            <button
+                              className="btn btn-link text-muted p-1"
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                onDeleteField(section.id, null);
+                              }}
+                            >
+                              <X size={16} />
+                            </button>
                           </div>
-                          <button
-                            className="btn btn-link text-muted p-1"
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              onDeleteField(section.id, null);
-                            }}
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
 
-                        {/* dynamic fields */}
-                        <div className="row">
-                          <SortableContext items={section.fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-                            {section.fields
-                              .filter((field) => field.type !== "section")
-                              .map((field) => (
-                                <SortableField key={field.id} field={field}>
-                                  <div ref={(el) => (fieldRefs.current[field.id] = el)} className={field.width + " " + field.alignment + " mb-3"}>
-                                    {console.log("Rendering field", field.id, "inside SortableField", section)}
-                                    {renderField(field, section)}
-                                  </div>
-                                </SortableField>
-                              ))}
-                          </SortableContext>
+                          {/* dynamic fields */}
+                          <div className="row">
+                            <SortableContext items={section.fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                              {section.fields
+                                .filter((field) => field.type !== "section")
+                                .map((field) => (
+                                  <SortableField key={field.id} field={field}>
+                                    <div
+                                      ref={(el) => (fieldRefs.current[field.id] = el)}
+                                      className={field.width + " " + field.alignment + " " + field.align + " mb-3"}
+                                    >
+                                      {renderField(field, section)}
+                                    </div>
+                                  </SortableField>
+                                ))}
+                            </SortableContext> 
+                          </div>
                         </div>
                       </div>
                     </div>

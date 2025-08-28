@@ -182,7 +182,6 @@ const DndFormBuilder = () => {
 
   const deleteField = (fieldId, sectionId) => {
     if (sectionId) {
-      console.log("Deleting field", fieldId, "from section", sectionId);
       const section = formFields.find((field) => field.id === sectionId);
       if (section) {
         section.fields = section.fields.filter((f) => f.id !== fieldId);
