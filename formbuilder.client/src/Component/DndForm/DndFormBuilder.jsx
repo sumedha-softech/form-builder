@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { DndContext, closestCorners, PointerSensor, KeyboardSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, closestCorners, PointerSensor, KeyboardSensor, useSensor, useSensors, DragOverlay } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import PropertiesPanel from "../PropertiesPanel";
 import FormBuilderCanvasNew from "./FormBuilderCanvasNew";
@@ -46,7 +46,7 @@ const DndFormBuilder = () => {
 
   function handleDragOver(event) {
     const { active, over } = event;
-    if (!over || !over.id) return; // <-- guard clause
+    if (!over || !over.id) return;
 
     const activeContainer = findContainer(active.id);
     const overContainer = findContainer(over.id);
@@ -61,7 +61,9 @@ const DndFormBuilder = () => {
 
         if (!activeSection || !overSection) return newState;
 
-        const activeIndex = activeSection.fields.findIndex((f) => f.id === active.id);
+        const activeIndex = activeSection?.fields?.findIndex((f) => f.id === active.id);
+        if (activeIndex === undefined || activeIndex === -1) return newState;
+
         const overIndex = overSection.fields.findIndex((f) => f.id === over.id);
 
         if (activeIndex === -1) return newState;
@@ -128,46 +130,51 @@ const DndFormBuilder = () => {
   const handleFieldDrop = (e, targetSectionFieldId) => {
     e.preventDefault();
     const type = e.dataTransfer.getData("controlType");
-    if (type) {
-      const fieldType = fieldTypes
-        .map((fieldGroup) => fieldGroup.fields)
-        .flat()
-        .find((control) => control.type === type);
-      if (fieldType) {
-        if (targetSectionFieldId) {
-          const section = formFields.find((field) => field.id === targetSectionFieldId);
-          if (section && section.type === "section") {
-            const newField = {
-              id: `${type}_${Date.now()}`,
-              name: `${type}_${Date.now()}`,
-              type: fieldType.type,
-              label: `New ${fieldType.label}`,
-              required: false,
-              placeholder: `Enter ${fieldType.label}`,
-              sectionId: targetSectionFieldId,
-              isShowLabel: true,
-              isReadOnly: false,
-              width: "col-md-6",
-              alignment: "text-start",
-            };
-            section.fields.push(newField);
-            setFormFields(formFields.map((field) => (field.id === targetSectionFieldId ? section : field)));
-          }
-        } else {
-          const newSection = {
-            id: `section_${Date.now()}`,
-            type: fieldType.type,
-            fields: [],
-            title: `New ${fieldType.label} Title`,
-            description: `New ${fieldType.label} Description`,
-            isShowTitle: true,
-            isShowDescription: true,
-            width: "col-12",
-            alignment: "w-100 text-start",
-          };
-          setFormFields((prev) => [...prev, newSection]);
-        }
+
+    if (!type) return;
+
+    const fieldType = fieldTypes.flatMap((fg) => fg.fields).find((c) => c.type === type);
+    if (!fieldType) return;
+
+    if (targetSectionFieldId) {
+      const section = formFields.find((f) => f.id === targetSectionFieldId);
+      if (section && section.type === "section") {
+        const newField = {
+          id: `${type}_${Date.now()}`,
+          name: `${type}_${Date.now()}`,
+          type: fieldType.type,
+          label: `New ${fieldType.label}`,
+          required: false,
+          placeholder: `Enter ${fieldType.label}`,
+          sectionId: targetSectionFieldId,
+          isShowLabel: true,
+          isReadOnly: false,
+          width: "col-md-6",
+          alignment: "text-start",
+        };
+        section.fields.push(newField);
+        setFormFields(formFields.map((f) => (f.id === targetSectionFieldId ? section : f)));
       }
+    } else {
+      const newSection = {
+        id: `section_${Date.now()}`,
+        type: fieldType.type,
+        fields: [],
+        title: `New ${fieldType.label} Title`,
+        description: `New ${fieldType.label} Description`,
+        isShowTitle: true,
+        isShowDescription: true,
+        width: "col-12",
+        alignment: "w-100 text-start",
+        isReadOnly: fieldType.type !== "number",
+        ...(type === "select" && { options: ["Option 1", "Option 2", "Option 3"] }),
+        ...(type === "checkbox" && { options: ["Option 1", "Option 2", "Option 3"] }),
+        ...(type === "radio" && { options: ["Option 1", "Option 2", "Option 3"] }),
+        ...(type === "rating" && { options: [1, 2, 3, 4, 5] }),
+        ...(type === "file" && { allowMultiple: true }),
+        ...(type === "image" && { previewUrl: "" }),
+      };
+      setFormFields((prev) => [...prev, newSection]);
     }
   };
 

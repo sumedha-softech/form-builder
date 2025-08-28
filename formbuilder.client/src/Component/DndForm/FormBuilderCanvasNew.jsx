@@ -141,6 +141,231 @@ const FormBuilderCanvasNew = ({
           </>
         );
 
+      case "rating":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium">
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+
+            <style>
+              {`
+          /* Container spans full field width */
+          .rating-group {
+            width: 100%;
+            display: inline-flex;
+            /* show 1..5 left-to-right while keeping simple sibling CSS logic */
+            direction: rtl;               /* visual flip */
+            user-select: none;
+          }
+          .rating-input {
+            display: none;                /* hide radios */
+          }
+          .rating-star {
+            cursor: pointer;
+            font-size: 1.25rem;           /* star size */
+            line-height: 1;
+            padding: 0 .2rem;             /* tiny horizontal spacing */
+          }
+          .rating-star::before {
+            content: '☆';                 /* empty star */
+          }
+          /* When a radio is checked, fill that star and all to its "left" visually */
+          .rating-input:checked ~ label.rating-star::before {
+            content: '★';
+          }
+          /* Hover preview fills stars up to hovered one */
+          .rating-star:hover::before,
+          .rating-star:hover ~ label.rating-star::before {
+            content: '★';
+          }
+          /* Optional: color for filled stars (uses currentColor) */
+          .rating-group { color: #f59e0b; } /* similar to Bootstrap text-warning */
+          /* Respect disabled/readOnly: dim & no pointer */
+          .rating-group[aria-disabled="true"] .rating-star {
+            cursor: not-allowed;
+            opacity: 0.6;
+          }
+        `}
+            </style>
+
+            <div className="rating-group" aria-disabled={field.isReadOnly ? "true" : "false"}>
+              {[...(field.options || [1, 2, 3, 4, 5])].reverse().map((opt, idx) => {
+                const val = typeof opt === "number" ? opt : idx + 1;
+                const inputId = `${field.id}_star_${val}`;
+                return (
+                  <React.Fragment key={val}>
+                    <input className="rating-input" type="radio" name={field.name} id={inputId} disabled={field.isReadOnly} />
+                    <label className="rating-star" htmlFor={inputId} aria-label={`${val} star${val > 1 ? "s" : ""}`} title={`${val}`} />
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </>
+        );
+
+      case "checkbox":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium">
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+            <div>
+              {(field.options || ["Option 1", "Option 2", "Option 3"]).map((opt, idx) => (
+                <div className="form-check" key={idx}>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    name={`${field.name}[]`}
+                    id={`${field.id}_opt${idx}`}
+                    disabled={field.isReadOnly}
+                  />
+                  <label className="form-check-label" htmlFor={`${field.id}_opt${idx}`}>
+                    {opt}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </>
+        );
+
+      case "radio":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium">
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+            <div>
+              {(field.options || ["Option 1", "Option 2", "Option 3"]).map((opt, idx) => (
+                <div className="form-check" key={idx}>
+                  <input className="form-check-input" type="radio" name={field.name} id={`${field.id}_opt${idx}`} disabled={field.isReadOnly} />
+                  <label className="form-check-label" htmlFor={`${field.id}_opt${idx}`}>
+                    {opt}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </>
+        );
+
+      // case "divider":
+      //   return <hr className="my-4 border-top border-2" />;
+
+      case "select":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium" htmlFor={field.id}>
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+            <select id={field.id} name={field.name} className="form-select" disabled={field.isReadOnly}>
+              {(field.options || ["Option 1", "Option 2", "Option 3"]).map((opt, idx) => (
+                <option key={idx} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </>
+        );
+
+      case "file":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium" htmlFor={field.id}>
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+            <input
+              id={field.id}
+              name={field.name}
+              type="file"
+              className="form-control"
+              disabled={field.isReadOnly}
+              multiple={field.allowMultiple || false}
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                console.log("Files selected:", files);
+              }}
+            />
+          </>
+        );
+
+      case "image":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium" htmlFor={field.id}>
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+
+            <input
+              id={field.id}
+              name={field.name}
+              type="file"
+              accept="image/*"
+              className="form-control mb-2"
+              disabled={field.isReadOnly}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    field.previewUrl = ev.target?.result;
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+
+            {field.previewUrl && (
+              <div className="mt-2">
+                <img src={field.previewUrl} alt="Preview" style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px" }} />
+              </div>
+            )}
+          </>
+        );
+
+      case "date":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium" htmlFor={field.id}>
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+            <input id={field.id} name={field.name} type="date" className="form-control" disabled={field.isReadOnly} />
+          </>
+        );
+
+      case "time":
+        return fieldWrapper(
+          <>
+            {field.isShowLabel && (
+              <label className="form-label fw-medium" htmlFor={field.id}>
+                {field.label}
+                {field.required && <span className="text-danger ms-1">*</span>}
+              </label>
+            )}
+            <input id={field.id} name={field.name} type="time" className="form-control" disabled={field.isReadOnly} />
+          </>
+        );
+
       default:
         return fieldWrapper(
           <>
