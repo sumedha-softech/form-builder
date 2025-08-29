@@ -12,16 +12,32 @@ body {
     background-color: #f1f3f4;
 }
 
+.form-preview {
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+.form-section {
+}
+
+.form-field {
+}
+
+.sortable-section{
+    min-height: 100px;
+}
+
+.form-field .action-buttons {
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+
 .sidebar {
     background-color: #ffffff;
     border-right: 1px solid #dee2e6;
     width: 280px;
     min-width: 280px;
-}
-
-.form-preview {
-    background-color: #ffffff;
-    min-height: 100vh;
 }
 
 .properties-panel {
