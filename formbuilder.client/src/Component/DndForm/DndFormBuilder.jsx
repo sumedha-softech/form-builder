@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DndContext, closestCorners, PointerSensor, KeyboardSensor, useSensor, useSensors, DragOverlay } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import PropertiesPanel from "../PropertiesPanel";
+import PropertiesPanel from "./PropertiesPanelNew";
 import FormBuilderCanvasNew from "./FormBuilderCanvasNew";
 import FieldTypesSidebarNew from "./FieldTypesSidebarNew";
 import Header from "../Header";
@@ -64,7 +64,7 @@ const DndFormBuilder = () => {
         const activeIndex = activeSection?.fields?.findIndex((f) => f.id === active.id);
         if (activeIndex === undefined || activeIndex === -1) return newState;
 
-        const overIndex = overSection.fields.findIndex((f) => f.id === over.id);
+        const overIndex = overSection?.fields?.findIndex((f) => f.id === over.id);
 
         if (activeIndex === -1) return newState;
 
@@ -130,8 +130,22 @@ const DndFormBuilder = () => {
   const handleFieldDrop = (e, targetSectionFieldId) => {
     e.preventDefault();
     const type = e.dataTransfer.getData("controlType");
-
     if (!type) return;
+
+    if (type === "divider") {
+      const section = formFields.find((f) => f.id === targetSectionFieldId);
+      if (section && section.type === "section") {
+        const newField = {
+          id: `divider_${Date.now()}`,
+          type: "divider",
+          sectionId: targetSectionFieldId,
+          width: "col-12",
+        };
+        section.fields.push(newField);
+        setFormFields(formFields.map((f) => (f.id === targetSectionFieldId ? section : f)));
+      }
+      return;
+    }
 
     const fieldType = fieldTypes.flatMap((fg) => fg.fields).find((c) => c.type === type);
     if (!fieldType) return;
@@ -151,7 +165,18 @@ const DndFormBuilder = () => {
           isReadOnly: false,
           width: "col-md-6",
           alignment: "text-start",
+          ...(type === "checkbox" && {
+            options: ["Option 1", "Option 2"],
+            singleSelect: false,
+          }),
+          ...(type === "radio" && {
+            options: ["Option 1", "Option 2"],
+          }),
+          ...(type === "select" && {
+            options: ["Option 1", "Option 2", "Option 3"],
+          }),
         };
+
         section.fields.push(newField);
         setFormFields(formFields.map((f) => (f.id === targetSectionFieldId ? section : f)));
       }

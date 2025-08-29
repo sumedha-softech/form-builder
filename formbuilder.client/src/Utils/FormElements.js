@@ -134,7 +134,7 @@ export const fieldTypes = [
         title: "Selection",
         fields: [
             { type: "select", label: "Dropdown", icon: List },
-            { type: "radio", label: "Multiple Choice", icon: Circle },
+            { type: "radio", label: "Radio Button", icon: Circle },
             { type: "checkbox", label: "Checkboxes", icon: CheckSquare },
         ],
     },

@@ -217,14 +217,13 @@ const FormBuilderCanvasNew = ({
               </label>
             )}
             <div>
-              {(field.options || ["Option 1", "Option 2", "Option 3"]).map((opt, idx) => (
+              {field?.options?.map((opt, idx) => (
                 <div className="form-check" key={idx}>
                   <input
+                    type={field.singleSelect ? "radio" : "checkbox"}
                     className="form-check-input"
-                    type="checkbox"
-                    name={`${field.name}[]`}
-                    id={`${field.id}_opt${idx}`}
-                    disabled={field.isReadOnly}
+                    name={field.singleSelect ? field.id : `${field.id}_${idx}`}
+                    id={`${field.id}_${idx}`}
                   />
                   <label className="form-check-label" htmlFor={`${field.id}_opt${idx}`}>
                     {opt}
@@ -256,9 +255,6 @@ const FormBuilderCanvasNew = ({
             </div>
           </>
         );
-
-      // case "divider":
-      //   return <hr className="my-4 border-top border-2" />;
 
       case "select":
         return fieldWrapper(
@@ -366,6 +362,13 @@ const FormBuilderCanvasNew = ({
           </>
         );
 
+      case "divider":
+        return (
+          <div className="col-12 my-3">
+            <hr className="border-top border-2 w-100" />
+          </div>
+        );
+
       default:
         return fieldWrapper(
           <>
@@ -427,17 +430,23 @@ const FormBuilderCanvasNew = ({
                             <SortableContext items={section.fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
                               {section.fields
                                 .filter((field) => field.type !== "section")
-                                .map((field) => (
-                                  <SortableField key={field.id} field={field}>
-                                    <div
-                                      ref={(el) => (fieldRefs.current[field.id] = el)}
-                                      className={field.width + " " + field.alignment + " " + field.align + " mb-3"}
-                                    >
+                                .map((field) =>
+                                  field.type === "divider" ? (
+                                    <div key={field.id} ref={(el) => (fieldRefs.current[field.id] = el)} className="col-12 my-3">
                                       {renderField(field, section)}
                                     </div>
-                                  </SortableField>
-                                ))}
-                            </SortableContext> 
+                                  ) : (
+                                    <SortableField key={field.id} field={field}>
+                                      <div
+                                        ref={(el) => (fieldRefs.current[field.id] = el)}
+                                        className={field.width + " " + field.alignment + " " + field.align + " mb-3"}
+                                      >
+                                        {renderField(field, section)}
+                                      </div>
+                                    </SortableField>
+                                  )
+                                )}
+                            </SortableContext>
                           </div>
                         </div>
                       </div>
