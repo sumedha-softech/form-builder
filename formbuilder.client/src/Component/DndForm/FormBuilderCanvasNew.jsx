@@ -490,6 +490,10 @@ const FormBuilderCanvasNew = ({
                                                 {section.fields
                                                     .filter((field) => field.type !== "section")
                                                     .map((field) => (
+                                                      <div
+                                                                className="sortable-field"
+                                                                ref={(el) => (fieldRefs.current[field.id] = el)}
+                                                            >
                                                         <SortableField
                                                             key={field.id}
                                                             field={field}
@@ -498,13 +502,9 @@ const FormBuilderCanvasNew = ({
                                                             onSelectField={onSelectField}
                                                             onDeleteField={onDeleteField}
                                                         >
-                                                            <div
-                                                                className="sortable-field"
-                                                                ref={(el) => (fieldRefs.current[field.id] = el)}
-                                                            >
                                                                 {renderField(field)}
-                                                            </div>
                                                         </SortableField>
+                                                      </div>
                                                     ))}
                                             </SortableContext>
                                         </div>
