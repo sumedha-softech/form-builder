@@ -479,7 +479,10 @@ const FormBuilderCanvasNew = ({
                                                     onSelectSection(section);
                                                 }
                                             }}
-                                            onDrop={(e) => onDropHandler(e, section.id)}
+                                            onDrop={(e) => { 
+                                                e.stopPropagation(); 
+                                                e.preventDefault();
+                                                onDropHandler(e, section.id)}}
                                             onDragOver={(e) => e.preventDefault()}
                                         >
                                             <SortableContext
