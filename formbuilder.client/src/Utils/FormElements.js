@@ -119,7 +119,7 @@ export const fieldTypes = [
         title: "Contact",
         fields: [
             { type: "email", label: "Email", icon: Mail },
-            { type: "phone", label: "Phone", icon: Phone },
+            { type: "tel", label: "Phone", icon: Phone },
             { type: "url", label: "Website URL", icon: Link },
         ],
     },
