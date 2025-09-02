@@ -1,0 +1,36 @@
+.rating-group {
+  width: 100%;
+  display: inline-flex;
+  direction: rtl;
+  user-select: none;
+}
+.rating-input {
+  display: none;
+}
+.rating-star {
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0 0.2rem;
+}
+.rating-star::before {
+  content: "☆";
+}
+
+.rating-input:checked ~ label.rating-star::before {
+  content: "★";
+}
+
+.rating-star:hover::before,
+.rating-star:hover ~ label.rating-star::before {
+  content: "★";
+}
+
+.rating-group {
+  color: #f59e0b;
+}
+
+.rating-group[aria-disabled="true"] .rating-star {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

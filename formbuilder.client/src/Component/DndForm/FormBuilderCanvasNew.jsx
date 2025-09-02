@@ -1,87 +1,9 @@
 import React from "react";
-import { X, Trash2, GripVertical } from "lucide-react";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import "./dnd-style.css";
 
-function SortableSection({ section, children, onDeleteField, selectedSection, onSelectSection }) {
-  const { setNodeRef, attributes, listeners, transform, transition } = useSortable({ id: section.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} className={`${section.width} mb-2 p-0`}>
-      <div
-        className={`form-section card cursor-pointer h-100 ${selectedSection?.id === section.id ? " border-primary" : ""}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelectSection(section);
-        }}
-      >
-        <div className="card-header">
-          <div className="d-flex justify-content-between align-items-start">
-            <div className={section.alignment}>
-              {section.isShowTitle && <h5 className="card-title mb-1">{section.title}</h5>}
-              {section.isShowDescription && <p className="text-muted small mb-0">{section.description}</p>}
-            </div>
-            <button
-              type="button"
-              className="btn btn-link text-muted p-1"
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                onDeleteField(section.id, null);
-              }}
-            >
-              <X size={16} />
-            </button>
-            <button type="button" className="btn btn-link text-muted p-1 cursor-grab" {...attributes} {...listeners}>
-              <GripVertical size={16} />
-            </button>
-          </div>
-        </div>
-        <div className="card-body">{children}</div>
-      </div>
-    </div>
-  );
-}
-
-function SortableField({ field, selectedField, onSelectField, onDeleteField, sectionField, children }) {
-  const { setNodeRef, attributes, listeners } = useSortable({ id: field.id });
-  const isSelected = selectedField?.id === field.id;
-  return (
-    <div ref={setNodeRef} className={field.width + " " + field.alignment + " mb-3"}>
-      <div
-        className={`form-field position-relative p-3 border border-2 rounded cursor-pointer ${isSelected ? "border-success" : "border-transparent"}`}
-        style={{ cursor: "pointer" }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelectField(field);
-        }}
-      >
-        {isSelected && (
-          <div className="action-buttons d-flex position-absolute top-0 end-0">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteField(field.id, sectionField.id);
-              }}
-              className="btn btn-sm btn-outline-danger me-1 py-1 pb-2 px-2 lh-1"
-            >
-              <Trash2 size={12} />
-            </button>
-            <button type="button" className="btn btn-sm btn-outline-info py-1 pb-2 px-2 lh-1" {...attributes} {...listeners}>
-              <GripVertical size={16} />
-            </button>
-          </div>
-        )}
-        {children}
-      </div>
-    </div>
-  );
-}
+import SortableSection from "./SortableSection";
+import SortableField from "./SortableField";
 
 function formatPhone(value) {
   const cleaned = value.replace(/\D/g, "");
@@ -312,46 +234,7 @@ const FormBuilderCanvasNew = ({
               </label>
             )}
 
-            <style>
-              {`
-          /* Container spans full field width */
-          .rating-group {
-            width: 100%;
-            display: inline-flex;
-            /* show 1..5 left-to-right while keeping simple sibling CSS logic */
-            direction: rtl;               /* visual flip */
-            user-select: none;
-          }
-          .rating-input {
-            display: none;                /* hide radios */
-          }
-          .rating-star {
-            cursor: pointer;
-            font-size: 1.25rem;           /* star size */
-            line-height: 1;
-            padding: 0 .2rem;             /* tiny horizontal spacing */
-          }
-          .rating-star::before {
-            content: '☆';                 /* empty star */
-          }
-          /* When a radio is checked, fill that star and all to its "left" visually */
-          .rating-input:checked ~ label.rating-star::before {
-            content: '★';
-          }
-          /* Hover preview fills stars up to hovered one */
-          .rating-star:hover::before,
-          .rating-star:hover ~ label.rating-star::before {
-            content: '★';
-          }
-          /* Optional: color for filled stars (uses currentColor) */
-          .rating-group { color: #f59e0b; } /* similar to Bootstrap text-warning */
-          /* Respect disabled/readOnly: dim & no pointer */
-          .rating-group[aria-disabled="true"] .rating-star {
-            cursor: not-allowed;
-            opacity: 0.6;
-          }
-        `}
-            </style>
+            {/* Add style for rating */}
 
             <div className="rating-group" aria-disabled={field.isReadOnly ? "true" : "false"}>
               {[...(field.options || [1, 2, 3, 4, 5])].reverse().map((opt, idx) => {
