@@ -146,7 +146,7 @@ export const fieldTypes = [
             { type: "payment", label: "Payment", icon: DollarSign },
             { type: "file", label: "File Upload", icon: Upload },
             { type: "image", label: "Image", icon: Image },
-            { type: "section", label: "Section", icon: Star },
+            // { type: "section", label: "Section", icon: Star },
         ],
     },
 ];

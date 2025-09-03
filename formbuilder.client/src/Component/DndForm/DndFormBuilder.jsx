@@ -1,17 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
-import { DndContext, closestCorners, PointerSensor, KeyboardSensor, useSensor, useSensors, DragOverlay } from "@dnd-kit/core";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import PropertiesPanel from "./PropertiesPanelNew";
-import FormBuilderCanvasNew from "./FormBuilderCanvasNew";
+import { useEffect, useRef, useState } from "react";
+import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors, DragOverlay, useDroppable } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import FieldTypesSidebarNew from "./FieldTypesSidebarNew";
 import Header from "../Header";
-import { fieldTypes } from "../../Utils/FormElements";
+import PropertiesPanel from "./PropertiesPanelNew";
+import FormBuilderCanvasNew from "./FormBuilderCanvasNew";
 
 const DndFormBuilder = () => {
   const fieldRefs = useRef({});
   const propertyPanelRef = useRef({});
   const [selectedField, setSelectedField] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
+  const [activeDragItem, setActiveDragItem] = useState(null);
   const [formFields, setFormFields] = useState([]);
 
   useEffect(() => {
@@ -35,173 +35,6 @@ const DndFormBuilder = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [selectedField, selectedSection]);
-
-  function findContainer(id) {
-    if (!id) return null;
-    if (formFields.some((section) => section.id === id)) {
-      return id;
-    }
-    return formFields.find((section) => section.fields.some((f) => f.id === id))?.id || null;
-  }
-
-  function handleDragOver(event) {
-    const { active, over } = event;
-    if (!over || !over.id) return;
-
-    const activeContainer = findContainer(active.id);
-    const overContainer = findContainer(over.id);
-
-    if (!activeContainer || !overContainer) return;
-
-    if (activeContainer !== overContainer) {
-      setFormFields((prev) => {
-        const newState = [...prev];
-        const activeSection = newState.find((s) => s.id === activeContainer);
-        const overSection = newState.find((s) => s.id === overContainer);
-
-        if (!activeSection || !overSection) return newState;
-
-        const activeIndex = activeSection?.fields?.findIndex((f) => f.id === active.id);
-        if (activeIndex === undefined || activeIndex === -1) return newState;
-
-        const overIndex = overSection?.fields?.findIndex((f) => f.id === over.id);
-
-        if (activeIndex === -1) return newState;
-
-        const [movedItem] = activeSection.fields.splice(activeIndex, 1);
-        if (overIndex === -1) {
-          overSection.fields.push(movedItem);
-        } else {
-          overSection.fields.splice(overIndex + 1, 0, movedItem);
-        }
-
-        return newState;
-      });
-    }
-  }
-
-  function handleDragEnd(event) {
-    const { active, over } = event;
-    if (!over || !over.id) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    if (!activeId || !overId) return;
-
-    if (formFields.some((s) => s.id === activeId) && formFields.some((s) => s.id === overId)) {
-      setFormFields((prev) =>
-        arrayMove(
-          prev,
-          prev.findIndex((s) => s.id === activeId),
-          prev.findIndex((s) => s.id === overId)
-        )
-      );
-      return;
-    }
-
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
-
-    if (
-      activeContainer &&
-      overContainer &&
-      activeContainer === overContainer &&
-      formFields.some((s) => s.id === activeContainer) &&
-      !formFields.some((s) => s.id === activeId)
-    ) {
-      setFormFields((prev) => {
-        return prev.map((section) =>
-          section.id === activeContainer
-            ? {
-                ...section,
-                fields: arrayMove(
-                  section.fields,
-                  section.fields.findIndex((f) => f.id === activeId),
-                  section.fields.findIndex((f) => f.id === overId)
-                ),
-              }
-            : section
-        );
-      });
-    }
-  }
-
-  const handleFieldDrop = (e, targetSectionFieldId) => {
-    e.preventDefault();
-    const type = e.dataTransfer.getData("controlType");
-    if (!type) return;
-
-    if (type === "divider") {
-      const section = formFields.find((f) => f.id === targetSectionFieldId);
-      if (section && section.type === "section") {
-        const newField = {
-          id: `divider_${Date.now()}`,
-          type: "divider",
-          sectionId: targetSectionFieldId,
-          width: "col-12",
-        };
-        section.fields.push(newField);
-        setFormFields(formFields.map((f) => (f.id === targetSectionFieldId ? section : f)));
-      }
-      return;
-    }
-
-    const fieldType = fieldTypes.flatMap((fg) => fg.fields).find((c) => c.type === type);
-    if (!fieldType) return;
-
-    if (targetSectionFieldId) {
-      const section = formFields.find((f) => f.id === targetSectionFieldId);
-      if (section && section.type === "section") {
-        const newField = {
-          id: `${type}_${Date.now()}`,
-          name: `${type}_${Date.now()}`,
-          type: fieldType.type,
-          label: `New ${fieldType.label}`,
-          required: false,
-          placeholder: `Enter ${fieldType.label}`,
-          sectionId: targetSectionFieldId,
-          isShowLabel: true,
-          isReadOnly: false,
-          width: "col-md-6",
-          alignment: "text-start",
-          ...(type === "checkbox" && {
-            options: ["Option 1", "Option 2"],
-            singleSelect: false,
-          }),
-          ...(type === "radio" && {
-            options: ["Option 1", "Option 2"],
-          }),
-          ...(type === "select" && {
-            options: ["Option 1", "Option 2", "Option 3"],
-          }),
-        };
-
-        section.fields.push(newField);
-        setFormFields(formFields.map((f) => (f.id === targetSectionFieldId ? section : f)));
-      }
-    } else {
-      const newSection = {
-        id: `section_${Date.now()}`,
-        type: fieldType.type,
-        fields: [],
-        title: `New ${fieldType.label} Title`,
-        description: `New ${fieldType.label} Description`,
-        isShowTitle: true,
-        isShowDescription: true,
-        width: "col-12",
-        alignment: "w-100 text-start",
-        isReadOnly: fieldType.type !== "number",
-        ...(type === "select" && { options: ["Option 1", "Option 2", "Option 3"] }),
-        ...(type === "checkbox" && { options: ["Option 1", "Option 2", "Option 3"] }),
-        ...(type === "radio" && { options: ["Option 1", "Option 2", "Option 3"] }),
-        ...(type === "rating" && { options: [1, 2, 3, 4, 5] }),
-        ...(type === "file" && { allowMultiple: true }),
-        ...(type === "image" && { previewUrl: "" }),
-      };
-      setFormFields((prev) => [...prev, newSection]);
-    }
-  };
 
   const updateField = (updatedField) => {
     setFormFields(
@@ -241,27 +74,121 @@ const DndFormBuilder = () => {
   return (
     <div className="form-builder-container d-flex flex-column">
       <Header />
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={(event) => setActiveDragItem(event.active.data.current)}
+        onDragEnd={(event) => {
+          setActiveDragItem(null);
+          if (event.over?.id === "canvas" && event.active.data.current) {
+            const dragged = event.active.data.current;
+
+            if (dragged.type === "section") {
+              setFormFields((prev) => [
+                ...prev,
+                {
+                  id: `${dragged.type}_${Date.now()}`,
+                  type: dragged.type,
+                  label: dragged.label,
+                  fields: [],
+                },
+              ]);
+            }
+          } else if (event.over && event.active.data.current) {
+            const dragged = event.active.data.current;
+
+            if (dragged.type !== "section" && formFields.some((sec) => sec.id === event.over.id)) {
+              setFormFields((prev) =>
+                prev.map((sec) =>
+                  sec.id === event.over.id
+                    ? {
+                        ...sec,
+                        fields: [
+                          ...sec.fields,
+                          {
+                            id: `${dragged.type}_${Date.now()}`,
+                            type: dragged.type,
+                            label: dragged.label || dragged.type,
+                            name: `${dragged.type}_${Date.now()}`,
+                            isShowLabel: true,
+                            isReadOnly: false,
+                            required: false,
+                            placeholder: `Enter ${dragged.label || dragged.type}`,
+                            options:
+                              dragged.type === "radio" || dragged.type === "select" || dragged.type === "checkbox" ? ["Option 1", "Option 2"] : [],
+                          },
+                        ],
+                      }
+                    : sec
+                )
+              );
+            }
+          }
+        }}
+      >
         <div className="d-flex flex-grow-1 overflow-hidden">
+          {/* Sidebar */}
           <FieldTypesSidebarNew />
+          {/* Canvas */}
           <FormBuilderCanvasNew
+            id="canvas"
             formFields={formFields}
             selectedField={selectedField}
             selectedSection={selectedSection}
-            onSelectField={setSelectedField}
-            onSelectSection={setSelectedSection}
+            onSelectField={(field) => {
+              setSelectedField(field);
+              setSelectedSection(null);
+            }}
+            onSelectSection={(section) => {
+              setSelectedSection(section);
+              setSelectedField(null);
+            }}
             onDeleteField={deleteField}
-            fieldRefs={fieldRefs}
-            onDropHandler={handleFieldDrop}
+            onDeleteSection={(sectionId) => {
+              setFormFields((prev) => prev.filter((s) => s.id !== sectionId));
+              if (selectedSection?.id === sectionId) {
+                setSelectedSection(null);
+                setSelectedField(null);
+              }
+            }}
           />
+
           <PropertiesPanel
             selectedField={selectedField}
-            onUpdateField={updateField}
+            onUpdateField={(updated) => {
+              setFormFields((prev) =>
+                prev.map((sec) =>
+                  sec.id === selectedField.sectionId
+                    ? {
+                        ...sec,
+                        fields: sec.fields.map((f) => (f.id === updated.id ? updated : f)),
+                      }
+                    : sec
+                )
+              );
+              setSelectedField(updated);
+            }}
             selectedSection={selectedSection}
-            onUpdateSection={updateSection}
-            propertyPanelRef={propertyPanelRef}
+            onUpdateSection={(updated) => {
+              setFormFields((prev) => prev.map((sec) => (sec.id === updated.id ? updated : sec)));
+              setSelectedSection(updated);
+            }}
           />
         </div>
+        {/* Overlay */}
+        <DragOverlay>
+          {activeDragItem ? (
+            <div
+              className="btn btn-outline-secondary btn-sm drag-overlay d-flex align-items-center"
+              style={{
+                cursor: "grabbing",
+                pointerEvents: "none",
+              }}
+            >
+              {activeDragItem.icon && <activeDragItem.icon size={16} className="me-2" />}
+              {activeDragItem.label}
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </div>
   );
