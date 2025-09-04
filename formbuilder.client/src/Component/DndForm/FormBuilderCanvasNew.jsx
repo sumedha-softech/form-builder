@@ -453,11 +453,12 @@ const FormBuilderCanvasNew = ({ formFields, id, selectedField, onSelectField, on
   };
 
   return (
-    <div className="d flex-grow-1 overflow-auto p-4">
+    <div className="form-preview flex-grow-1 overflow-auto p-4">
       <div
         ref={setNodeRef}
         style={{
-          height: "100%",
+          // height: "100%",
+          minHeight: 200,
           border: "2px dashed #aaa",
           borderColor: isOver ? "blue" : "#aaa",
           padding: "1rem",
