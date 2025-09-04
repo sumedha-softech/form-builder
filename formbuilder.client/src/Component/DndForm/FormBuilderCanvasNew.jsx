@@ -35,7 +35,9 @@ export const SectionDroppable = ({
   return (
     <div
       ref={setNodeRef}
-      className={`position-relative mb-3 p-3 rounded border ${selectedSection?.id === section.id ? "border-primary" : "border-secondary"}`}
+      className={`position-relative mb-3 p-3 rounded border ${selectedSection?.id === section.id ? "border-primary" : "border-secondary"} ${
+        section.width || "col-md-12"
+      } ${section.align}`}
       style={style}
       onClick={(e) => {
         e.stopPropagation();
@@ -43,9 +45,11 @@ export const SectionDroppable = ({
       }}
       {...attributes}
     >
-      {/* Section header + controls */}
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <strong>{section.label}</strong>
+      <div className={`d-flex justify-content-between align-items-center mb-2`}>
+        <div className="flex-gow-1">
+          {section.isShowTitle !== false && <strong className="d-block">{section.title || section.label}</strong>}
+          {section.isShowDescription !== false && section.description && <small className="text-muted d-block">{section.description}</small>}
+        </div>
         {selectedSection?.id === section.id && (
           <div className="d-flex gap-1">
             <button
@@ -65,7 +69,6 @@ export const SectionDroppable = ({
         )}
       </div>
 
-      {/* Fields inside section */}
       <div className="mt-2 row">
         {section.fields.length === 0 ? (
           <div className="text-muted">Drop fields inside this section</div>
@@ -84,7 +87,6 @@ export const SectionDroppable = ({
             >
               {renderField(field)}
 
-              {/* Field delete + drag buttons */}
               {selectedField?.id === field.id && (
                 <div className="position-absolute top-0 end-0 d-flex gap-1 m-1">
                   <button
@@ -457,7 +459,6 @@ const FormBuilderCanvasNew = ({ formFields, id, selectedField, onSelectField, on
       <div
         ref={setNodeRef}
         style={{
-          // height: "100%",
           minHeight: 200,
           border: "2px dashed #aaa",
           borderColor: isOver ? "blue" : "#aaa",

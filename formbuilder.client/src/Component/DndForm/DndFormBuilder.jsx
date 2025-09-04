@@ -84,6 +84,28 @@ const DndFormBuilder = () => {
       return;
     }
 
+    if (dragged?.origin === "sidebar" && dragged.type === "section") {
+      setFormFields((prev) => {
+        const newSection = {
+          id: `${dragged.type}_${Date.now()}`,
+          type: dragged.type,
+          label: dragged.label,
+          fields: [],
+          width: "col-md-12",
+        };
+
+        if (over.id === "canvas") {
+          return [...prev, newSection];
+        }
+
+        const overIndex = prev.findIndex((s) => s.id === over.id);
+        if (overIndex === -1) return [...prev, newSection];
+
+        return [...prev.slice(0, overIndex), newSection, ...prev.slice(overIndex)];
+      });
+      return;
+    }
+
     if (event.over?.id === "canvas" && dragged?.origin === "sidebar" && dragged.type === "section") {
       setFormFields((prev) => [
         ...prev,
@@ -135,6 +157,7 @@ const DndFormBuilder = () => {
         <div className="d-flex flex-grow-1 overflow-hidden">
           {/* Sidebar */}
           <FieldTypesSidebarNew />
+          
           {/* Canvas */}
           <FormBuilderCanvasNew
             id="canvas"
