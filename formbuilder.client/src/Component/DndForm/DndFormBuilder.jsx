@@ -68,73 +68,70 @@ const DndFormBuilder = () => {
     }
   };
 
+  const handleDragEnd = (event) => {
+    setActiveDragItem(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const dragged = event.active.data.current;
+
+    if (active.id !== over.id && formFields.some((s) => s.id === active.id)) {
+      setFormFields((prev) => {
+        const oldIndex = prev.findIndex((s) => s.id === active.id);
+        const newIndex = prev.findIndex((s) => s.id === over.id);
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+      return;
+    }
+
+    if (event.over?.id === "canvas" && dragged?.origin === "sidebar" && dragged.type === "section") {
+      setFormFields((prev) => [
+        ...prev,
+        {
+          id: `${dragged.type}_${Date.now()}`,
+          type: dragged.type,
+          label: dragged.label,
+          fields: [],
+          width: "col-md-12",
+        },
+      ]);
+      return;
+    }
+
+    if (dragged?.origin === "sidebar" && dragged.type !== "section" && formFields.some((sec) => sec.id === over.id)) {
+      setFormFields((prev) =>
+        prev.map((sec) =>
+          sec.id === over.id
+            ? {
+                ...sec,
+                fields: [
+                  ...sec.fields,
+                  {
+                    id: `${dragged.type}_${Date.now()}`,
+                    type: dragged.type,
+                    label: dragged.label || dragged.type,
+                    name: `${dragged.type}_${Date.now()}`,
+                    isShowLabel: true,
+                    isReadOnly: false,
+                    required: false,
+                    placeholder: `Enter ${dragged.label || dragged.type}`,
+                    options: dragged.type === "radio" || dragged.type === "select" || dragged.type === "checkbox" ? ["Option 1", "Option 2"] : [],
+                    width: "col-md-12",
+                  },
+                ],
+              }
+            : sec
+        )
+      );
+    }
+  };
+
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
   return (
     <div className="form-builder-container d-flex flex-column">
       <Header />
-      <DndContext
-        sensors={sensors}
-        onDragStart={(event) => setActiveDragItem(event.active.data.current)}
-        onDragEnd={(event) => {
-          setActiveDragItem(null);
-          const { active, over } = event;
-          if (!over) return;
-
-          const dragged = event.active.data.current;
-
-          if (active.id !== over.id && formFields.some((s) => s.id === active.id)) {
-            setFormFields((prev) => {
-              const oldIndex = prev.findIndex((s) => s.id === active.id);
-              const newIndex = prev.findIndex((s) => s.id === over.id);
-              return arrayMove(prev, oldIndex, newIndex);
-            });
-            return;
-          }
-
-          if (event.over?.id === "canvas" && dragged?.origin === "sidebar" && dragged.type === "section") {
-            setFormFields((prev) => [
-              ...prev,
-              {
-                id: `${dragged.type}_${Date.now()}`,
-                type: dragged.type,
-                label: dragged.label,
-                fields: [],
-                width: "col-md-12",
-              },
-            ]);
-            return;
-          }
-
-          if (dragged?.origin === "sidebar" && dragged.type !== "section" && formFields.some((sec) => sec.id === over.id)) {
-            setFormFields((prev) =>
-              prev.map((sec) =>
-                sec.id === over.id
-                  ? {
-                      ...sec,
-                      fields: [
-                        ...sec.fields,
-                        {
-                          id: `${dragged.type}_${Date.now()}`,
-                          type: dragged.type,
-                          label: dragged.label || dragged.type,
-                          name: `${dragged.type}_${Date.now()}`,
-                          isShowLabel: true,
-                          isReadOnly: false,
-                          required: false,
-                          placeholder: `Enter ${dragged.label || dragged.type}`,
-                          options:
-                            dragged.type === "radio" || dragged.type === "select" || dragged.type === "checkbox" ? ["Option 1", "Option 2"] : [],
-                          width: "col-md-12",
-                        },
-                      ],
-                    }
-                  : sec
-              )
-            );
-          }
-        }}
-      >
+      <DndContext sensors={sensors} onDragStart={(event) => setActiveDragItem(event.active.data.current)} onDragEnd={(event) => handleDragEnd(event)}>
         <div className="d-flex flex-grow-1 overflow-hidden">
           {/* Sidebar */}
           <FieldTypesSidebarNew />
