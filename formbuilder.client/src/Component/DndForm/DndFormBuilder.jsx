@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors, DragOverlay, useDroppable } from "@dnd-kit/core";
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import FieldTypesSidebarNew from "./FieldTypesSidebarNew";
 import Header from "../Header";
 import PropertiesPanel from "./PropertiesPanelNew";
@@ -36,13 +36,17 @@ const DndFormBuilder = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [selectedField, selectedSection]);
 
-  const updateField = (updatedField) => {
-    setFormFields(
-      formFields.map((field) =>
-        field.id === updatedField.sectionId ? { ...field, fields: field.fields.map((f) => (f.id === updatedField.id ? updatedField : f)) } : field
+  const handleUpdateField = (sectionId, fieldId, updatedProps) => {
+    setFormFields((prev) =>
+      prev.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              fields: section.fields.map((field) => (field.id === fieldId ? { ...field, ...updatedProps } : field)),
+            }
+          : section
       )
     );
-    setSelectedField(updatedField);
   };
 
   const deleteField = (fieldId, sectionId) => {
@@ -64,11 +68,6 @@ const DndFormBuilder = () => {
     }
   };
 
-  const updateSection = (updatedField) => {
-    setFormFields(formFields.map((field) => (field.id === updatedField.id ? updatedField : field)));
-    setSelectedSection(updatedField);
-  };
-
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
   return (
@@ -79,49 +78,60 @@ const DndFormBuilder = () => {
         onDragStart={(event) => setActiveDragItem(event.active.data.current)}
         onDragEnd={(event) => {
           setActiveDragItem(null);
-          if (event.over?.id === "canvas" && event.active.data.current) {
-            const dragged = event.active.data.current;
+          const { active, over } = event;
+          if (!over) return;
 
-            if (dragged.type === "section") {
-              setFormFields((prev) => [
-                ...prev,
-                {
-                  id: `${dragged.type}_${Date.now()}`,
-                  type: dragged.type,
-                  label: dragged.label,
-                  fields: [],
-                },
-              ]);
-            }
-          } else if (event.over && event.active.data.current) {
-            const dragged = event.active.data.current;
+          const dragged = event.active.data.current;
 
-            if (dragged.type !== "section" && formFields.some((sec) => sec.id === event.over.id)) {
-              setFormFields((prev) =>
-                prev.map((sec) =>
-                  sec.id === event.over.id
-                    ? {
-                        ...sec,
-                        fields: [
-                          ...sec.fields,
-                          {
-                            id: `${dragged.type}_${Date.now()}`,
-                            type: dragged.type,
-                            label: dragged.label || dragged.type,
-                            name: `${dragged.type}_${Date.now()}`,
-                            isShowLabel: true,
-                            isReadOnly: false,
-                            required: false,
-                            placeholder: `Enter ${dragged.label || dragged.type}`,
-                            options:
-                              dragged.type === "radio" || dragged.type === "select" || dragged.type === "checkbox" ? ["Option 1", "Option 2"] : [],
-                          },
-                        ],
-                      }
-                    : sec
-                )
-              );
-            }
+          if (active.id !== over.id && formFields.some((s) => s.id === active.id)) {
+            setFormFields((prev) => {
+              const oldIndex = prev.findIndex((s) => s.id === active.id);
+              const newIndex = prev.findIndex((s) => s.id === over.id);
+              return arrayMove(prev, oldIndex, newIndex);
+            });
+            return;
+          }
+
+          if (event.over?.id === "canvas" && dragged?.origin === "sidebar" && dragged.type === "section") {
+            setFormFields((prev) => [
+              ...prev,
+              {
+                id: `${dragged.type}_${Date.now()}`,
+                type: dragged.type,
+                label: dragged.label,
+                fields: [],
+                width: "col-md-12",
+              },
+            ]);
+            return;
+          }
+
+          if (dragged?.origin === "sidebar" && dragged.type !== "section" && formFields.some((sec) => sec.id === over.id)) {
+            setFormFields((prev) =>
+              prev.map((sec) =>
+                sec.id === over.id
+                  ? {
+                      ...sec,
+                      fields: [
+                        ...sec.fields,
+                        {
+                          id: `${dragged.type}_${Date.now()}`,
+                          type: dragged.type,
+                          label: dragged.label || dragged.type,
+                          name: `${dragged.type}_${Date.now()}`,
+                          isShowLabel: true,
+                          isReadOnly: false,
+                          required: false,
+                          placeholder: `Enter ${dragged.label || dragged.type}`,
+                          options:
+                            dragged.type === "radio" || dragged.type === "select" || dragged.type === "checkbox" ? ["Option 1", "Option 2"] : [],
+                          width: "col-md-12",
+                        },
+                      ],
+                    }
+                  : sec
+              )
+            );
           }
         }}
       >
@@ -134,6 +144,7 @@ const DndFormBuilder = () => {
             formFields={formFields}
             selectedField={selectedField}
             selectedSection={selectedSection}
+            onUpdateField={handleUpdateField}
             onSelectField={(field) => {
               setSelectedField(field);
               setSelectedSection(null);

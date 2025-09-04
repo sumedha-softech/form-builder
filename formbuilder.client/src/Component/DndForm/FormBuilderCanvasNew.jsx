@@ -3,6 +3,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import "./dnd-style.css";
 import { useDroppable } from "@dnd-kit/core";
 import { GripVertical, Trash2 } from "lucide-react";
+import { SortableSection } from "./SortableSection";
 
 function formatPhone(value) {
   const cleaned = value.replace(/\D/g, "");
@@ -17,7 +18,7 @@ function formatPhone(value) {
   return formatted;
 }
 
-const SectionDroppable = ({
+export const SectionDroppable = ({
   section,
   renderField,
   onSelectSection,
@@ -26,21 +27,21 @@ const SectionDroppable = ({
   selectedField,
   onDeleteField,
   onDeleteSection,
+  listeners,
+  attributes,
+  setNodeRef,
+  style,
 }) => {
-  const { setNodeRef, isOver } = useDroppable({ id: section.id });
-
   return (
     <div
       ref={setNodeRef}
       className={`position-relative mb-3 p-3 rounded border ${selectedSection?.id === section.id ? "border-primary" : "border-secondary"}`}
-      style={{
-        background: isOver ? "#f1f5ff" : "#fff",
-        cursor: "pointer",
-      }}
+      style={style}
       onClick={(e) => {
         e.stopPropagation();
         onSelectSection(section);
       }}
+      {...attributes}
     >
       {/* Section header + controls */}
       <div className="d-flex justify-content-between align-items-center mb-2">
@@ -57,7 +58,7 @@ const SectionDroppable = ({
             >
               <Trash2 size={14} />
             </button>
-            <button type="button" className="btn btn-sm btn-outline-info py-1 px-2 lh-1" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="btn btn-sm btn-outline-info py-1 px-2 lh-1" onClick={(e) => e.stopPropagation()} {...listeners}>
               <GripVertical size={16} />
             </button>
           </div>
@@ -65,14 +66,16 @@ const SectionDroppable = ({
       </div>
 
       {/* Fields inside section */}
-      <div className="mt-2">
+      <div className="mt-2 row">
         {section.fields.length === 0 ? (
           <div className="text-muted">Drop fields inside this section</div>
         ) : (
           section.fields.map((field) => (
             <div
               key={field.id}
-              className={`p-2 rounded position-relative mt-3 ${selectedField?.id === field.id ? "border border-primary" : "border"}`}
+              className={`p-2 rounded position-relative mt-3 ${selectedField?.id === field.id ? "border border-primary" : "border"} ${
+                field.width || "col-md-12"
+              } ${field.align || "text-start"}`}
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -144,16 +147,6 @@ const FormBuilderCanvasNew = ({ formFields, id, selectedField, onSelectField, on
           </>
         );
 
-      case "section":
-        return (
-          <div className="border rounded p-3 mb-3 bg-white">
-            <strong>{field.label}</strong>
-            <div className="mt-2" style={{ minHeight: 50, border: "1px dashed #ccc" }}>
-              {/*  */}
-            </div>
-          </div>
-        );
-
       case "number":
         return (
           <>
@@ -207,8 +200,7 @@ const FormBuilderCanvasNew = ({ formFields, id, selectedField, onSelectField, on
             <input
               onChange={(e) => {
                 const formatted = formatPhone(e.target.value);
-                field.value = formatted;
-                e.target.value = formatted;
+                onUpdateField(sectionId, field.id, { value: formatted });
               }}
               id={field.id}
               name={field.name}
@@ -474,22 +466,23 @@ const FormBuilderCanvasNew = ({ formFields, id, selectedField, onSelectField, on
         {formFields.length === 0 ? (
           <div className="text-center text-muted">Drop Section</div>
         ) : (
-          formFields.map((section) => (
-            <div key={section.id} className="border rounded p-3 mb-3 bg-white">
-              <SectionDroppable
-                SectionDroppable={SectionDroppable}
-                key={section.id}
-                section={section}
-                renderField={renderField}
-                onDeleteField={onDeleteField}
-                onDeleteSection={onDeleteSection}
-                onSelectSection={onSelectSection}
-                onSelectField={onSelectField}
-                selectedSection={selectedSection}
-                selectedField={selectedField}
-              />
-            </div>
-          ))
+          <div className="row">
+            <SortableContext items={formFields.map((section) => section.id)} strategy={verticalListSortingStrategy}>
+              {formFields.map((section) => (
+                <SortableSection
+                  key={section.id}
+                  section={section}
+                  renderField={renderField}
+                  onDeleteField={onDeleteField}
+                  onDeleteSection={onDeleteSection}
+                  onSelectSection={onSelectSection}
+                  onSelectField={onSelectField}
+                  selectedSection={selectedSection}
+                  selectedField={selectedField}
+                />
+              ))}
+            </SortableContext>
+          </div>
         )}
       </div>
     </div>

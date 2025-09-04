@@ -8,6 +8,7 @@ const DraggableField = ({ field }) => {
     data: {
       type: field.type,
       label: field.label,
+      origin: "sidebar"
     },
   });
 
