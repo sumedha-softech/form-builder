@@ -4,6 +4,7 @@ import "./dnd-style.css";
 import { useDroppable } from "@dnd-kit/core";
 import { GripVertical, Trash2 } from "lucide-react";
 import { SortableSection } from "./SortableSection";
+import SortableField from "./SortableField";
 
 function formatPhone(value) {
   const cleaned = value.replace(/\D/g, "");
@@ -73,39 +74,19 @@ export const SectionDroppable = ({
         {section.fields.length === 0 ? (
           <div className="text-muted">Drop fields inside this section</div>
         ) : (
-          section.fields.map((field) => (
-            <div
-              key={field.id}
-              className={`p-2 rounded position-relative mt-3 ${selectedField?.id === field.id ? "border border-primary" : "border"} ${
-                field.width || "col-md-12"
-              } ${field.align || "text-start"}`}
-              style={{ cursor: "pointer" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectField({ ...field, sectionId: section.id });
-              }}
-            >
-              {renderField(field)}
-
-              {selectedField?.id === field.id && (
-                <div className="position-absolute top-0 end-0 d-flex gap-1 m-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteField(field.id, section.id);
-                    }}
-                    className="btn btn-sm btn-outline-danger py-1 px-2 lh-1"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                  <button type="button" className="btn btn-sm btn-outline-info py-1 px-2 lh-1" onClick={(e) => e.stopPropagation()}>
-                    <GripVertical size={16} />
-                  </button>
-                </div>
-              )}
-            </div>
-          ))
+          <SortableContext items={section.fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+            {section.fields.map((field) => (
+              <SortableField
+                key={field.id}
+                field={field}
+                sectionId={section.id}
+                renderField={renderField}
+                selectedField={selectedField}
+                onSelectField={onSelectField}
+                onDeleteField={onDeleteField}
+              />
+            ))}
+          </SortableContext>
         )}
       </div>
     </div>

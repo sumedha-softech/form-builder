@@ -84,6 +84,19 @@ const DndFormBuilder = () => {
       return;
     }
 
+    setFormFields((prev) =>
+      prev.map((sec) => {
+        if (!sec.fields.some((f) => f.id === active.id)) return sec;
+        const oldIndex = sec.fields.findIndex((f) => f.id === active.id);
+        const newIndex = sec.fields.findIndex((f) => f.id === over.id);
+        if (newIndex === -1) return sec;
+        return {
+          ...sec,
+          fields: arrayMove(sec.fields, oldIndex, newIndex),
+        };
+      })
+    );
+
     if (dragged?.origin === "sidebar" && dragged.type === "section") {
       setFormFields((prev) => {
         const newSection = {
@@ -157,7 +170,7 @@ const DndFormBuilder = () => {
         <div className="d-flex flex-grow-1 overflow-hidden">
           {/* Sidebar */}
           <FieldTypesSidebarNew />
-          
+
           {/* Canvas */}
           <FormBuilderCanvasNew
             id="canvas"
@@ -209,7 +222,7 @@ const DndFormBuilder = () => {
         <DragOverlay>
           {activeDragItem ? (
             <div
-              className="btn btn-outline-secondary btn-sm drag-overlay d-flex align-items-center"
+              className="btn  btn-sm drag-overlay d-flex align-items-center"
               style={{
                 cursor: "grabbing",
                 pointerEvents: "none",

@@ -2,25 +2,18 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
 
-export const SortableField = ({ field, sectionId, renderField, onSelectField, selectedField, onDeleteField }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: field.id,
-    data: {
-      ...field,
-      sectionId,
-      origin: "canvas",
-    },
-  });
+const SortableField = ({ field, sectionId, renderField, selectedField, onSelectField, onDeleteField }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    cursor: "default",
   };
 
   return (
     <div
       ref={setNodeRef}
-      {...attributes}
       style={style}
       className={`p-2 rounded position-relative mt-3 ${selectedField?.id === field.id ? "border border-primary" : "border"} ${
         field.width || "col-md-12"
@@ -44,7 +37,14 @@ export const SortableField = ({ field, sectionId, renderField, onSelectField, se
           >
             <Trash2 size={12} />
           </button>
-          <button type="button" className="btn btn-sm btn-outline-info py-1 px-2 lh-1" onClick={(e) => e.stopPropagation()} {...listeners}>
+          {/* Drag handle only */}
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-info py-1 px-2 lh-1"
+            onClick={(e) => e.stopPropagation()}
+            {...attributes}
+            {...listeners}
+          >
             <GripVertical size={16} />
           </button>
         </div>
@@ -52,3 +52,5 @@ export const SortableField = ({ field, sectionId, renderField, onSelectField, se
     </div>
   );
 };
+
+export default SortableField;
