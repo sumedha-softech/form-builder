@@ -73,7 +73,99 @@ const DndFormBuilder = () => {
     const { active, over } = event;
     if (!over) return;
 
-    const dragged = event.active.data.current;
+    const dragged = active.data.current;
+    const overData = over.data.current;
+
+    if (dragged?.type === "section" && overData?.type === "section" && active.id !== over.id) {
+      setFormFields((prev) => {
+        const oldIndex = prev.findIndex((s) => s.id === active.id);
+        const newIndex = prev.findIndex((s) => s.id === over.id);
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+      return;
+    }
+
+    if (dragged?.type === "field" && overData?.type === "field" && dragged.sectionId === overData.sectionId) {
+      setFormFields((prev) =>
+        prev.map((sec) => {
+          if (sec.id !== dragged.sectionId) return sec;
+          const oldIndex = sec.fields.findIndex((f) => f.id === dragged.id);
+          const newIndex = sec.fields.findIndex((f) => f.id === over.id);
+          return {
+            ...sec,
+            fields: arrayMove(sec.fields, oldIndex, newIndex),
+          };
+        })
+      );
+      return;
+    }
+
+    if (dragged?.type === "field") {
+      setFormFields((prev) => {
+        let movedField = null;
+
+        let updated = prev.map((sec) => {
+          if (sec.id === dragged.sectionId) {
+            const filtered = sec.fields.filter((f) => {
+              if (f.id === dragged.id) {
+                movedField = f;
+                return false;
+              }
+              return true;
+            });
+            return { ...sec, fields: filtered };
+          }
+          return sec;
+        });
+
+        if (!movedField) return updated;
+
+        updated = updated.map((sec) => {
+
+          if (overData?.type === "field" && sec.id === overData.sectionId) {
+            const overIndex = sec.fields.findIndex((f) => f.id === over.id);
+            const newFields = [...sec.fields.slice(0, overIndex), { ...movedField, sectionId: sec.id }, ...sec.fields.slice(overIndex)];
+            return { ...sec, fields: newFields };
+          }
+
+          if (overData?.type === "section" && sec.id === overData.id) {
+            return { ...sec, fields: [...sec.fields, { ...movedField, sectionId: sec.id }] };
+          }
+
+          return sec;
+        });
+
+        return updated;
+      });
+    }
+
+    if (dragged?.type === "field" && overData?.type === "section" && dragged.sectionId !== overData.id) {
+      setFormFields((prev) => {
+        let movedField = null;
+
+        const updated = prev.map((sec) => {
+          if (sec.id === dragged.sectionId) {
+            const filtered = sec.fields.filter((f) => {
+              if (f.id === dragged.id) {
+                movedField = f;
+                return false;
+              }
+              return true;
+            });
+            return { ...sec, fields: filtered };
+          }
+          return sec;
+        });
+
+        return updated.map((sec) => {
+          if (sec.id === overData.id && movedField) {
+            return { ...sec, fields: [...sec.fields, { ...movedField, sectionId: overData.id }] };
+          }
+          return sec;
+        });
+      });
+      return;
+    }
 
     if (active.id !== over.id && formFields.some((s) => s.id === active.id)) {
       setFormFields((prev) => {

@@ -4,7 +4,13 @@ import { SectionDroppable } from "./FormBuilderCanvasNew";
 
 export const SortableSection = (props) => {
   const { section } = props;
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.id, origin: "canvas" });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: section.id,
+    data: {
+      type: "section",
+      id: section.id,
+    },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),

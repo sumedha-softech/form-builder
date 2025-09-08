@@ -3,7 +3,14 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
 
 const SortableField = ({ field, sectionId, renderField, selectedField, onSelectField, onDeleteField }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: field.id,
+    data: {
+      type: "field",
+      id: field.id,
+      sectionId,
+    },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
