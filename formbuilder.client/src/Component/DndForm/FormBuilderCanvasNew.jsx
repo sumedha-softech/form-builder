@@ -35,6 +35,7 @@ export const SectionDroppable = ({
 }) => {
   return (
     <div
+      id={section.id}
       ref={setNodeRef}
       className={`position-relative mb-3 p-3 rounded border ${selectedSection?.id === section.id ? "border-primary" : "border-secondary"} ${
         section.width || "col-md-12"
