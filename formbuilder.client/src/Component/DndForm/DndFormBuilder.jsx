@@ -8,7 +8,7 @@ import FormBuilderCanvasNew from "./FormBuilderCanvasNew";
 
 const DndFormBuilder = () => {
   const fieldRefs = useRef({});
-  const propertyPanelRef = useRef({});
+  const propertyPanelRef = useRef(null);
   const [selectedField, setSelectedField] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [activeDragItem, setActiveDragItem] = useState(null);
@@ -20,14 +20,14 @@ const DndFormBuilder = () => {
         selectedField &&
         fieldRefs.current[selectedField.id] &&
         !fieldRefs.current[selectedField.id].contains(event.target) &&
-        !propertyPanelRef.current.contains(event.target)
+        !propertyPanelRef.current?.contains(event.target)
       ) {
         setSelectedField(null);
       }
       if (
         selectedSection &&
         !document.getElementById(selectedSection.id)?.contains(event.target) &&
-        !propertyPanelRef.current.contains(event.target)
+        !propertyPanelRef.current?.contains(event.target)
       ) {
         setSelectedSection(null);
       }
@@ -195,28 +195,29 @@ const DndFormBuilder = () => {
               }
             }}
           />
-
-          <PropertiesPanel
-            selectedField={selectedField}
-            onUpdateField={(updated) => {
-              setFormFields((prev) =>
-                prev.map((sec) =>
-                  sec.id === selectedField.sectionId
-                    ? {
-                        ...sec,
-                        fields: sec.fields.map((f) => (f.id === updated.id ? updated : f)),
-                      }
-                    : sec
-                )
-              );
-              setSelectedField(updated);
-            }}
-            selectedSection={selectedSection}
-            onUpdateSection={(updated) => {
-              setFormFields((prev) => prev.map((sec) => (sec.id === updated.id ? updated : sec)));
-              setSelectedSection(updated);
-            }}
-          />
+          <div ref={propertyPanelRef}>
+            <PropertiesPanel
+              selectedField={selectedField}
+              onUpdateField={(updated) => {
+                setFormFields((prev) =>
+                  prev.map((sec) =>
+                    sec.id === selectedField.sectionId
+                      ? {
+                          ...sec,
+                          fields: sec.fields.map((f) => (f.id === updated.id ? updated : f)),
+                        }
+                      : sec
+                  )
+                );
+                setSelectedField(updated);
+              }}
+              selectedSection={selectedSection}
+              onUpdateSection={(updated) => {
+                setFormFields((prev) => prev.map((sec) => (sec.id === updated.id ? updated : sec)));
+                setSelectedSection(updated);
+              }}
+            />
+          </div>
         </div>
         {/* Overlay */}
         <DragOverlay>

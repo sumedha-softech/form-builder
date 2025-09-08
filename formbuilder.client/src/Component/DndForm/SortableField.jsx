@@ -16,7 +16,7 @@ const SortableField = ({ field, sectionId, renderField, selectedField, onSelectF
       ref={setNodeRef}
       style={style}
       className={`p-2 rounded position-relative mt-3 ${selectedField?.id === field.id ? "border border-primary" : "border"} ${
-        field.width || "col-md-12"
+        field.width || "col-md-6"
       } ${field.align || "text-start"}`}
       onClick={(e) => {
         e.stopPropagation();

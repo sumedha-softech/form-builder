@@ -106,7 +106,15 @@ const FormBuilderCanvasNew = ({ formFields, id, selectedField, onSelectField, on
                 {field.required && <span className="text-danger ms-1">*</span>}
               </label>
             )}
-            <input id={field.id} name={field.name} readOnly={field.isReadOnly} type="text" className="form-control" placeholder={field.placeholder} />
+            <input
+              id={field.id}
+              name={field.name}
+              readOnly={field.isReadOnly}
+              type="text"
+              className="form-control"
+              defaultValue=""
+              placeholder={field.placeholder}
+            />
           </>
         );
 
