@@ -1,19 +1,47 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Forms from './Component/Forms';
-import './App.css';
-import FormBuilder from './Component/FormBuilder';
-import FormBuilder_new from "./Component/FormBuilder_new";
+import { FbDataContext } from "./context/FbContext";
+import FormCanvas from "./components/FormCanvas";
+import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
+import { useContext } from "react";
+import "./style.css";
 
 function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Forms />} />
-                <Route path="/builder/form/:id?/:isTemplate?" element={<FormBuilder />} />
-                <Route path="/builder/form-new" element={<FormBuilder_new />} />
-            </Routes>
-        </BrowserRouter>
-    )
-}
+  const { 
+    setFormFields, 
+    setSelectedField, 
+    mode 
+  } = useContext(FbDataContext);
 
+  const updateField = (updatedField) => {
+    setFormFields(prev => {
+      return prev?.map(section => (
+        {
+          ...section, 
+          fields:section?.fields?.map(field => (field?.id === updatedField?.id) ? updatedField : field)
+        }
+      ))
+    });
+    setSelectedField(updatedField);
+  };
+
+  const updateSection = (updatedField) => {
+    setFormFields(prev => {
+      return prev?.map(field => (field?.id === updatedField?.id) ? updatedField : field)
+    });
+    setSelectedField(updatedField);
+  };
+
+  return (
+    <div className={`main ${mode === "light" ? "light-mode" : "dark-mode"}`}>
+      <Navbar />
+      <div className="form-builder-container">
+        <FormCanvas />
+        <Sidebar 
+          onUpdateField={updateField} 
+          onUpdateSection={updateSection} 
+        />
+      </div>
+    </div>
+  );
+}
 export default App;
