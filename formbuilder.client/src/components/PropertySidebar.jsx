@@ -11,7 +11,7 @@ const PropertySidebar=({ onUpdateSection, onUpdateField }) => {
 
   return (
     <div className="property-sidebar-outer-container">
-      <div className="property-sidebar-outer-wrapper">
+      <div className={`property-sidebar-outer-wrapper ${mode==='light' ? 'property-sidebar-outer-wrapper-light' : 'property-sidebar-outer-wrapper-dark'}`}>
         <span 
           className={`property-sidebar-heading ${mode === "light" ? "property-sidebar-heading-light" : "property-sidebar-heading-dark"}`} 
           onClick={() => setShowProperties(!showProperties)}

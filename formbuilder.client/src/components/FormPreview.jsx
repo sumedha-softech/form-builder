@@ -246,6 +246,7 @@ const FormPreview = ({ setShowPreview }) => {
 
   return (
     <div className={`form-preview-page ${mode === "light" ? "form-preview-page-light" : "form-preview-page-dark"}`}>
+      
       <button className="form-preview-close-btn">
         <Cross onClick={() => setShowPreview(false)} className={`form-preview-close-btn-icon ${mode === "light" ? "form-preview-close-btn-icon-light" : "form-preview-close-btn-icon-dark"}`}/>
       </button>
@@ -253,17 +254,12 @@ const FormPreview = ({ setShowPreview }) => {
       <div className={`form-preview-container ${mode === "light" ? "form-preview-container-light" : "form-preview-container-dark"}`}>
         <div className="form-preview-heading">
           <h1 className={`form-preview-heading-title ${mode === "light" ? "form-preview-heading-title-light" : "form-preview-heading-title-dark"}`}>
-            form preview
+            <span className={`form-preview-title-heading ${mode === "light" ? "form-preview-title-heading-light" : "form-preview-title-heading-dark"}`}>{formData?.title ? formData?.title : "form"}</span> preview
           </h1>
           <h5>This is the preview of how the form look like.</h5>
         </div>
 
         <div className={`form-preview ${mode === "light" ? "form-preview-light" : "form-preview-dark"}`}>
-          <div className="form-preview-title">
-            <h2 className={`form-preview-title-heading ${mode === "light" ? "form-preview-title-heading-light" : "form-preview-title-heading-dark"}`}>
-              {formData?.title}
-            </h2>
-          </div>
 
           <div className="form-preview-section-container">
             {

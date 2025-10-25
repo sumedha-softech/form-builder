@@ -9,7 +9,7 @@ const FieldSidebar = () => {
 
   return (
     <div className="field-sidebar-outer-container">
-      <div className="field-sidebar-outer-wrapper">
+      <div className={`field-sidebar-outer-wrapper ${mode==='light' ? 'field-sidebar-outer-wrapper-light' : 'field-sidebar-outer-wrapper-dark'}`}>
         <span
           className={`field-sidebar-heading ${
             mode === "light"

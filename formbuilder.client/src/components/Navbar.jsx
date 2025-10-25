@@ -1,4 +1,4 @@
-import { ArrowLeft, Copy, Eye, Moon, Pencil, Sun } from "lucide-react";
+import { ArrowDownUp, ArrowLeft, Copy, Eye, Moon, Pencil, Sun } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { FbDataContext } from "../context/FbContext";
 import FormPreview from "./FormPreview";
@@ -15,6 +15,7 @@ const Navbar = () => {
   } = useContext(FbDataContext);
   const [editTitle, setEditTitle] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [copyMode, setCopyMode] = useState('html');
 
   useEffect(() => {
     setFormData({ id: Date.now(), title: formTitle, formdata: formFields });
@@ -25,140 +26,133 @@ const Navbar = () => {
     switch (field?.type) {
       case "text":
         return `
-          <div className="form-field-wrapper" style={{textAlign: ${field?.fieldAlign}}}>
+          <div style={{textAlign: ${field?.fieldAlign}}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
             <input 
               type="text" 
               placeholder='${field?.placeholder}' 
-              className="form-field-input" 
               readOnly={${field?.isReadonly}}
             />
           </div>`;
       case "email":
         return `
-          <div className="form-field-wrapper" style={{textAlign: ${field?.fieldAlign}}}>
+          <div style={{textAlign: ${field?.fieldAlign}}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
             <input 
               type="email" 
               placeholder='${field?.placeholder}' 
-              className="form-field-input" 
               readOnly={${field?.isReadonly}}
             />
           </div>`;
       case "phone":
         return `
-          <div className="form-field-wrapper" style={{textAlign: ${field?.fieldAlign}}}>
+          <div style={{textAlign: ${field?.fieldAlign}}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
             <input 
               type="number" 
               placeholder='${field?.placeholder}' 
-              className="form-field-input" 
               readOnly={${field?.isReadonly}}
             />
           </div>`;
       case "number":
         return `
-          <div className="form-field-wrapper" style={{textAlign: '${field?.fieldAlign}'}}>
+          <div style={{textAlign: '${field?.fieldAlign}'}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
             <input 
               type="number" 
               placeholder='${field?.placeholder}' 
-              className="form-field-input" 
               readOnly={${field?.isReadonly}}
             />
           </div>`;
       case "textarea":
         return `
-          <div className="form-field-wrapper" style={{textAlign: '${field?.fieldAlign}'}}>
+          <div style={{textAlign: '${field?.fieldAlign}'}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
             <textarea 
               placeholder='${field?.placeholder}' 
-              className="form-field-input" 
               readOnly={${field?.isReadonly}} 
               rows={3}
             />
           </div>`;
       case "checkbox":
         return `
-          <div className="form-field-wrapper" style={{textAlign: '${field?.fieldAlign}'}}>
+          <div style={{textAlign: '${field?.fieldAlign}'}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
-            <div className="form-field-checkbox-wrapper">
+            <div>
               <input 
                 type="checkbox" 
-                className="form-field-checkbox" 
               />
-              <label className="form-field-checkbox-label">
+              <label>
                 Checkbox
               </label>
             </div>
           </div>`;
       case "radio":
         return `
-          <div className="form-field-wrapper" style={{textAlign: '${field?.fieldAlign}'}}>
+          <div style={{textAlign: '${field?.fieldAlign}'}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
-            <div className="form-field-radio-wrapper">
+            <div>
               <input 
                 type="radio" 
-                className="form-field-radio" 
               />
-              <label className="form-field-radio-label">
+              <label>
                 Radio Option
               </label>
             </div>
           </div>`;
       case "select":
         return `
-          <div className="form-field-wrapper" style={{textAlign: '${field?.fieldAlign}'}}>
+          <div style={{textAlign: '${field?.fieldAlign}'}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
-            <select className="form-field-input" defaultValue="">
+            <select defaultValue="">
               <option value="" disabled>Select an option</option>
               <option>Option 1</option>
               <option>Option 2</option>
@@ -166,48 +160,43 @@ const Navbar = () => {
           </div>`;
       default:
         return `
-          <div className="form-field-wrapper" style={{textAlign: '${field?.fieldAlign}'}}>
+          <div style={{textAlign: '${field?.fieldAlign}'}}>
             ${
               field?.isShowLabel 
               && 
-              `<label className="form-field-label">
+              `<label>
                 ${field?.label}
               </label>`
             }
             <input 
               type="text" 
               placeholder='${field?.placeholder}' 
-              className="form-field-default-input" 
               readOnly={${field?.isReadonly}}
             />
           </div>`;
     }
   };
 
-  const copyFormText = () => {
+  const copyFormHtml = () => {
     return `
-      <div className="form-preview ${mode === "light" ? "form-preview-light" : "form-preview-dark"}">
-
-        <div className="form-preview-title">
-          <h2 className="form-preview-title-heading ${mode === "light" ? "form-preview-title-heading-light" : "form-preview-title-heading-dark"}">
+      <div>
+        <div>
+          <h2>
             ${formData?.title}
           </h2>
         </div>
 
-        <div className="form-preview-section-container">
+        <div>
           ${
             formData?.formdata?.map(sec =>
               `<div 
-                key={${sec?.id}} 
-                className="form-preview-section ${mode === "light" ? "form-preview-section-light" : "form-preview-section-dark"}" 
                 style={{width: '${sec?.sectionWidth}', textAlign: '${sec?.sectionAlign}'}}
               >
-                <div className="form-preview-section-heading">
+                <div>
                   ${
                     sec?.isShowTitle 
                     &&
-                    `<h4 className="form-preview-section-heading-title ${mode === "light" ? "form-preview-section-heading-title-light" : "form-preview-section-heading-title-dark"}"
-                    >
+                    `<h4>
                       ${ sec?.title }
                     </h4>`
                   }
@@ -220,11 +209,10 @@ const Navbar = () => {
                   }
                 </div>
 
-                <div className="form-preview-section-wrapper">
+                <div>
                   ${
                     sec?.fields?.map(field =>
-                      `<div key={${field?.id}} style={{width: '${field?.fieldWidth}', textAlign: '${field?.fieldAlign}'}} className="form-preview-section-field-wrapper ${mode === "light" ? "form-preview-section-field-wrapper-light" : "form-preview-section-field-wrapper-dark"}"
-                      >                                             
+                      `<div style={{width: '${field?.fieldWidth}', textAlign: '${field?.fieldAlign}'}}>                                             
                         ${ copyRenderField(field) }
                       </div>`
                     )
@@ -238,14 +226,56 @@ const Navbar = () => {
     `;
   };
 
+  const copyFormJson = () => {
+    return {
+      "formTitle": formData?.title,
+      "formData": formData?.formdata?.map((sec) => {
+        return {
+          "sectionTitle": sec?.title,
+          "sectionDesc": sec?.description,
+          "sectionFields": sec?.fields?.map((field) => {
+            return {
+              "fieldLabel": field?.label,
+              "fieldType": field?.type,
+              "fieldAlign": field?.fieldAlign,
+              "isFieldLabelShow": field?.isShowLabel,
+              "fieldPlaceholder": field?.placeholder,
+              "isFieldReadOnly": field?.isReadonly
+            }
+          })
+        }
+      })
+    }
+  }
+
   // function to handle form copy
   const handleFormCopy = () => {
     if (formData?.formdata?.length<1) return;
-    const copyText = copyFormText();
-    navigator.clipboard.writeText(copyText);
-    alert("form copied to clipboard!!");
-    return;
+
+    if (copyMode === 'html') {
+      const copyHtml = copyFormHtml();
+      navigator.clipboard.writeText(copyHtml);
+      alert("form HTML copied to clipboard!!");
+      return;
+    }else if (copyMode === 'json') {
+      const copyJson = copyFormJson();
+      const jsonString = JSON.stringify(copyJson, null, 2);
+      navigator.clipboard.writeText(jsonString);
+      alert("form JSON copied to clipboard!!");
+      return;
+    }else {
+      return;
+    }
   };
+
+  const changeCopyMode = () => {
+    setCopyMode((prev) => {
+      if (prev==='html') {
+        return 'json';
+      }
+      return 'html';
+    })
+  }
 
   return (
     <div className={`navbar ${mode === "light" ? "navbar-light" : "navbar-dark"}`}>
@@ -276,7 +306,8 @@ const Navbar = () => {
                 <input 
                   type="text" 
                   autoFocus 
-                  value={formTitle} 
+                  value={formTitle}
+                  maxLength={100} 
                   onChange={e => setFormTitle(e.target.value)} 
                   className={`form-title-edit-input ${mode === "light" ? "form-title-edit-input-light" : "form-title-edit-input-dark"}`}
                 />
@@ -315,14 +346,36 @@ const Navbar = () => {
           <Eye size={16} /> Preview
         </button>
 
-        <button 
-          className={`nav-right-btn ${mode==="light"?"nav-btn-light":"nav-btn-dark"}`} 
-          onClick={handleFormCopy}
-        >
-          <Copy size={16} /> Copy
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          {
+            copyMode === 'html'
+            ?
+            (<button 
+              className={`nav-right-btn ${mode==="light"?"nav-btn-light":"nav-btn-dark"}`} 
+              onClick={handleFormCopy}
+            >
+              <Copy size={16} /> Copy HTML
+            </button>)
+            :
+            (<button 
+              className={`nav-right-btn ${mode==="light"?"nav-btn-light":"nav-btn-dark"}`} 
+              onClick={handleFormCopy}
+            >
+              <Copy size={16} /> Copy JSON
+            </button>)
+          }
+          <button style={{ display: "flex", alignItems: "center" }} onClick={changeCopyMode}>
+            <div className="tooltip">
+              <ArrowDownUp color={mode==='light' ? "black" : "white"} size={18} />
+              <span className="tooltiptext">
+                switch to {copyMode==='html' ? 'json' : 'html'}
+              </span>
+            </div>
+          </button>
+        </div>
 
         <button 
+          disabled
           className={`nav-right-btn ${mode==="light"?"nav-btn-light":"nav-btn-dark"}`}
         >
           Publish
