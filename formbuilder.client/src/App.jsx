@@ -6,18 +6,14 @@ import { useContext } from "react";
 import "./style.css";
 
 function App() {
-  const { 
-    setFormFields, 
-    setSelectedField, 
-    mode 
-  } = useContext(FbDataContext);
+  const {setSelectedField, setFormFields, mode} = useContext(FbDataContext);
 
   const updateField = (updatedField) => {
     setFormFields(prev => {
       return prev?.map(section => (
         {
           ...section, 
-          fields:section?.fields?.map(field => (field?.id === updatedField?.id) ? updatedField : field)
+          fields:section?.fields?.map(field => (field?.id===updatedField?.id) ? updatedField : field)
         }
       ))
     });
@@ -34,7 +30,7 @@ function App() {
   return (
     <div className={`main ${mode === "light" ? "light-mode" : "dark-mode"}`}>
       <Navbar />
-      <div className="form-builder-container">
+      <div className="fb-container">
         <FormCanvas />
         <Sidebar 
           onUpdateField={updateField} 
